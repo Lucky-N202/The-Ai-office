@@ -1,0 +1,63 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: the_ai_office
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build:
+      context: .
+      target: dev
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/the_ai_office
+      DIRECT_URL: postgresql://postgres:postgres@db:5432/the_ai_office
+      AUTH_SECRET: ${AUTH_SECRET:-dev-only-secret-change-me}
+      AUTH_GITHUB_ID: ${AUTH_GITHUB_ID:-}
+      AUTH_GITHUB_SECRET: ${AUTH_GITHUB_SECRET:-}
+      NEXTAUTH_URL: http://localhost:3000
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      # Bind-mount your source for hot reload...
+      - .:/app
+      # ...but keep node_modules and .next living inside the container's own
+      # filesystem (anonymous volumes), not on the host. This is what avoids
+      # Windows/antivirus from ever touching node_modules at all.
+      - /app/node_modules
+      - /app/.next
+
+  # One-off helper: `docker compose run --rm migrate` applies Prisma migrations
+  # against the `db` service. Uses the `builder` stage since it has the full
+  # Prisma CLI (the production `runner` image deliberately doesn't).
+  migrate:
+    build:
+      context: .
+      target: builder
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/the_ai_office
+      DIRECT_URL: postgresql://postgres:postgres@db:5432/the_ai_office
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["bunx", "prisma", "migrate", "deploy"]
+    profiles: ["tools"]
+
+volumes:
+  postgres_data:

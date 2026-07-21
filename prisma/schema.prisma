@@ -1,0 +1,149 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum PricingModel {
+  FREE
+  FREEMIUM
+  PAID
+  ENTERPRISE
+  OPEN_SOURCE
+}
+
+model User {
+  id            String     @id @default(cuid())
+  name          String?
+  email         String     @unique
+  emailVerified DateTime?
+  image         String?
+  role          Role       @default(USER)
+  createdAt     DateTime   @default(now())
+  bookmarks     Bookmark[]
+  reviews       Review[]
+  accounts      Account[]
+  sessions      Session[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String
+  icon        String // lucide-react icon name
+  color       String // hex accent color
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  tools       Tool[]
+}
+
+model Tool {
+  id            String       @id @default(cuid())
+  name          String
+  slug          String       @unique
+  tagline       String
+  description   String       @db.Text
+  websiteUrl    String
+  logoUrl       String
+  pricingModel  PricingModel @default(FREEMIUM)
+  startingPrice Float?
+  features      String[]
+  pros          String[]
+  cons          String[]
+  tags          String[]
+  rating        Float        @default(0)
+  reviewCount   Int          @default(0)
+  featured      Boolean      @default(false)
+  verified      Boolean      @default(true)
+  categoryId    String
+  category      Category     @relation(fields: [categoryId], references: [id])
+  bookmarks     Bookmark[]
+  reviews       Review[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([categoryId])
+  @@index([featured])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int
+  title     String
+  body      String   @db.Text
+  toolId    String
+  tool      Tool     @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([toolId, userId])
+  @@index([toolId])
+}
+
+enum SubmissionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model ToolSubmission {
+  id             String           @id @default(cuid())
+  name           String
+  tagline        String
+  description    String           @db.Text
+  websiteUrl     String
+  submitterEmail String
+  status         SubmissionStatus @default(PENDING)
+  createdAt      DateTime         @default(now())
+  reviewedAt     DateTime?
+
+  @@index([status])
+}
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  toolId    String
+  tool      Tool     @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, toolId])
+}
