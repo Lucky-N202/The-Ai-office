@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ExternalLink, ArrowLeft, Check, X } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { getSiteUrl } from "@/lib/site";
 import { StarRating } from "@/components/ui/star-rating";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,7 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const tool = await getTool(slug);
   if (!tool) return {};
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://theaioffice.app";
+  const siteUrl = getSiteUrl();
   return {
     title: `${tool.name} — ${tool.tagline}`,
     description: tool.description.slice(0, 155),
@@ -57,7 +58,7 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
     take: 4,
   });
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://theaioffice.app";
+  const siteUrl = getSiteUrl();
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
@@ -70,6 +71,7 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
           applicationCategory: tool.category.name,
           url: `${siteUrl}/browse/tools/${tool.slug}`,
           image: tool.logoUrl,
+          dateModified: tool.updatedAt.toISOString(),
           offers: {
             "@type": "Offer",
             price: tool.startingPrice ?? 0,
@@ -80,6 +82,14 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
             ratingValue: tool.rating,
             reviewCount: tool.reviewCount,
           } : undefined,
+          breadcrumb: {
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "All Tools", item: `${siteUrl}/browse/tools/all` },
+              { "@type": "ListItem", position: 2, name: tool.category.name, item: `${siteUrl}/browse/categories/${tool.category.id}` },
+              { "@type": "ListItem", position: 3, name: tool.name, item: `${siteUrl}/browse/tools/${tool.slug}` },
+            ],
+          },
         }}
       />
 
