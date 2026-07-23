@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
+import { checkSubmissionRateLimit, getClientIp } from "@/lib/rate-limit";
 
 const submissionSchema = z.object({
   name: z.string().min(1).max(80),
@@ -14,8 +15,17 @@ const submissionSchema = z.object({
   company: z.string().max(0).optional(),
 });
 
-/** Public — anyone can submit a tool for review. No auth required. */
+/** Public — anyone can submit a tool for review. No auth required, rate limited by IP. */
 export async function POST(req: NextRequest) {
+  const ip = getClientIp(req);
+  const { success } = await checkSubmissionRateLimit(ip);
+  if (!success) {
+    return NextResponse.json(
+      { error: "Too many submissions. Please try again in a bit." },
+      { status: 429 }
+    );
+  }
+
   const body = await req.json();
   const parsed = submissionSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
