@@ -20,7 +20,7 @@ export default function ContactPage() {
           </div>
           <div>
             <p className="text-sm text-[var(--color-muted-2)]">Email us at</p>
-            <a href="mailto:hello@theaioffice.app" className="font-medium text-[var(--color-foreground)]">hello@theaioffice.app</a>
+            <a href="mailto:hello@the-ai-office.com" className="font-medium text-[var(--color-foreground)]">hello@the-ai-office.com</a>
           </div>
         </div>
         <p>

@@ -28,6 +28,7 @@ export async function GET() {
 - [Browse all tools](${siteUrl}/browse/tools/all): Full directory, filterable by category and pricing
 - [Compare tools](${siteUrl}/browse/compare): Side-by-side feature and pricing comparison
 - [Submit a tool](${siteUrl}/submit): Suggest a tool for the directory
+- [Advertise](${siteUrl}/advertise): Featured placement and advertising options for tool vendors
 
 ${sections}
 `;

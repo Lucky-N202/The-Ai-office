@@ -27,6 +27,7 @@ export default async function AdminToolsPage() {
               <th className="p-4">Tool</th>
               <th className="p-4">Category</th>
               <th className="p-4">Rating</th>
+              <th className="p-4">Clicks</th>
               <th className="p-4">Featured</th>
               <th className="p-4" />
             </tr>
@@ -42,6 +43,7 @@ export default async function AdminToolsPage() {
                 </td>
                 <td className="p-4 text-[var(--color-muted)]">{tool.category.name}</td>
                 <td className="p-4">{tool.rating.toFixed(1)}</td>
+                <td className="p-4 text-[var(--color-muted)]">{tool.clickCount.toLocaleString("en-US")}</td>
                 <td className="p-4">{tool.featured ? "Yes" : "—"}</td>
                 <td className="p-4"><AdminToolActions toolId={tool.id} /></td>
               </tr>

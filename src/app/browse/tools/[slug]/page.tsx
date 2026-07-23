@@ -114,13 +114,18 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
             </div>
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <BookmarkButton toolId={tool.id} toolName={tool.name} />
-          <a href={tool.websiteUrl} target="_blank" rel="noopener noreferrer nofollow">
-            <Button>
-              Visit Website <ExternalLink size={14} />
-            </Button>
-          </a>
+        <div className="flex shrink-0 flex-col items-end gap-1.5">
+          <div className="flex items-center gap-2">
+            <BookmarkButton toolId={tool.id} toolName={tool.name} />
+            <a href={`/out/${tool.id}`} target="_blank" rel="noopener noreferrer nofollow sponsored">
+              <Button>
+                Visit Website <ExternalLink size={14} />
+              </Button>
+            </a>
+          </div>
+          {tool.affiliateUrl && (
+            <p className="text-[11px] text-[var(--color-muted-2)]">We may earn a commission from this link.</p>
+          )}
         </div>
       </div>
 

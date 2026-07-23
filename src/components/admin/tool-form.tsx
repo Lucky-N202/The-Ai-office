@@ -30,6 +30,7 @@ export function ToolForm({ tool, categories }: { tool?: Tool; categories: Catego
       tagline: form.get("tagline") as string,
       description: form.get("description") as string,
       websiteUrl: form.get("websiteUrl") as string,
+      affiliateUrl: (form.get("affiliateUrl") as string) || null,
       logoUrl: form.get("logoUrl") as string,
       categoryId: form.get("categoryId") as string,
       pricingModel: form.get("pricingModel") as string,
@@ -63,6 +64,14 @@ export function ToolForm({ tool, categories }: { tool?: Tool; categories: Catego
         <Field label="Name"><Input name="name" defaultValue={tool?.name} required /></Field>
         <Field label="Tagline"><Input name="tagline" defaultValue={tool?.tagline} required /></Field>
         <Field label="Website URL"><Input name="websiteUrl" type="url" defaultValue={tool?.websiteUrl} required /></Field>
+        <Field label="Affiliate URL (optional — used for outbound clicks when set)">
+          <Input name="affiliateUrl" type="url" defaultValue={tool?.affiliateUrl ?? ""} placeholder="Leave blank until accepted into their affiliate program" />
+        </Field>
+        {tool && (
+          <Field label="Outbound clicks">
+            <p className="flex h-10 items-center text-sm text-[var(--color-muted)]">{tool.clickCount.toLocaleString("en-US")} total</p>
+          </Field>
+        )}
         <Field label="Logo URL"><Input name="logoUrl" type="url" defaultValue={tool?.logoUrl} required /></Field>
         <Field label="Category">
           <select name="categoryId" defaultValue={tool?.categoryId} required className="focus-ring h-10 w-full rounded-[14px] border border-[var(--color-border)] bg-white/[0.02] px-3.5 text-sm">

@@ -37,7 +37,7 @@ export default function PrivacyPage() {
           <h2 className="mb-2 text-lg font-semibold text-[var(--color-foreground)]">Your rights</h2>
           <p>
             You can request deletion of your account and associated data at any time by contacting us at{" "}
-            <a href="mailto:hello@theaioffice.app" className="text-[var(--color-primary)]">hello@theaioffice.app</a>.
+            <a href="mailto:hello@the-ai-office.com" className="text-[var(--color-primary)]">hello@the-ai-office.com</a>.
           </p>
         </section>
         <p className="text-xs text-[var(--color-muted-2)]">

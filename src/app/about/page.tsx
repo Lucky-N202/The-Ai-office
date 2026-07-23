@@ -21,12 +21,23 @@ export default async function AboutPage() {
         <p>
           We currently track {toolCount} tools across {categoryCount} categories, from writing and coding
           assistants to image, video, and audio generators. Every listing includes real pricing, features,
-          and pros and cons — no sponsored placement, no pay-to-rank.
+          and pros and cons.
         </p>
         <p>
           Tools are added and reviewed by our editorial team, with community ratings factored in over time.
           If you&rsquo;d like to see a tool added, use the{" "}
           <a href="/submit" className="text-[var(--color-primary)]">submission form</a>.
+        </p>
+        <p>
+          <strong className="text-[var(--color-foreground)]">How we make money:</strong> some listings marked
+          &ldquo;Featured&rdquo; are paid placements, and some outbound links are affiliate links that may earn
+          us a commission at no extra cost to you — these are always disclosed on the tool&rsquo;s page. Paid
+          placement never affects a tool&rsquo;s rating, reviews, or the accuracy of its pros and cons — those
+          stay editorially independent regardless of whether a tool advertises with us.
+        </p>
+        <p>
+          Interested in featuring your tool?{" "}
+          <a href="/advertise" className="text-[var(--color-primary)]">See advertising options</a>.
         </p>
       </div>
     </div>

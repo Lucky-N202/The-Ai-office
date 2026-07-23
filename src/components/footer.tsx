@@ -23,6 +23,7 @@ export function Footer() {
           <ul className="space-y-2 text-sm text-[var(--color-muted)]">
             <li><Link href="/about" className="hover:text-[var(--color-foreground)]">About</Link></li>
             <li><Link href="/contact" className="hover:text-[var(--color-foreground)]">Contact</Link></li>
+            <li><Link href="/advertise" className="hover:text-[var(--color-foreground)]">Advertise</Link></li>
           </ul>
         </div>
         <div>

@@ -29,6 +29,7 @@ const createToolSchema = z.object({
   tagline: z.string().min(1),
   description: z.string().min(1),
   websiteUrl: z.string().url(),
+  affiliateUrl: z.string().url().nullable().optional(),
   logoUrl: z.string().url(),
   categoryId: z.string().min(1),
   pricingModel: z.enum(["FREE", "FREEMIUM", "PAID", "ENTERPRISE", "OPEN_SOURCE"]).default("FREEMIUM"),

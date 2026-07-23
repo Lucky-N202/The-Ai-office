@@ -34,9 +34,9 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
   verification: {
     google: "Zoy5kKqQ-jj40RcDQsahBjHK3Z-i2h_ILVweO6Rxp38",
-  },
-  other: {
-    "msvalidate.01": "D6DFCC66773F7312797FC9B0F7BA8F39",
+    other: {
+      "msvalidate.01": "D6DFCC66773F7312797FC9B0F7BA8F39",
+    },
   },
 };
 
