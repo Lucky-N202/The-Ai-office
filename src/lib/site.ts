@@ -24,6 +24,16 @@
  * on the server.
  */
 export function getSiteUrl(): string {
+  const url = resolveSiteUrl();
+  // Strip any trailing slash(es) — callers all do `${siteUrl}/some/path`, so a
+  // trailing slash here (e.g. if NEXT_PUBLIC_SITE_URL was set to
+  // "https://example.com/" instead of "https://example.com") produces
+  // double-slash URLs like "https://example.com//browse/tools/all" everywhere
+  // downstream. Normalizing once here fixes it for every caller at once.
+  return url.replace(/\/+$/, "");
+}
+
+function resolveSiteUrl(): string {
   if (process.env.NEXT_PUBLIC_SITE_URL) {
     return process.env.NEXT_PUBLIC_SITE_URL;
   }
