@@ -21,8 +21,6 @@
   --animate-fade-up: fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
   --animate-shimmer: shimmer 2.4s linear infinite;
 
-  
-
   @keyframes fade-up {
     from { opacity: 0; transform: translateY(12px); }
     to { opacity: 1; transform: translateY(0); }
@@ -33,6 +31,10 @@
   }
 }
 
+/* Light mode palette. Unlayered on purpose: Tailwind's @theme values are emitted
+   inside a CSS cascade layer, and unlayered rules always win over layered ones
+   regardless of source order — so this reliably overrides the dark defaults
+   above whenever next-themes puts class="light" on <html>. */
 html.light {
   --color-bg: #ffffff;
   --color-bg-elevated: #f7f7f8;
@@ -51,15 +53,18 @@ html.light {
   * {
     border-color: var(--color-border);
   }
- 
-  html.dark { color-scheme: dark; }
-html.light { color-scheme: light; }
-
+  html.dark {
+    color-scheme: dark;
+  }
+  html.light {
+    color-scheme: light;
+  }
   body {
     background-color: var(--color-bg);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
   ::selection {
     background-color: var(--color-primary);
@@ -109,5 +114,3 @@ html.light { color-scheme: light; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--color-border-hover); border-radius: 999px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-muted-2); }
-
-

@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import * as Icons from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { getSiteUrl } from "@/lib/site";
 import { ToolCard } from "@/components/tool-card";
 import { JsonLd } from "@/components/json-ld";
 
@@ -31,7 +32,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const category = await prisma.category.findUnique({ where: { id } });
   if (!category) return {};
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://theaioffice.app";
+  const siteUrl = getSiteUrl();
   return {
     title: `Best ${category.name} AI Tools`,
     description: category.description,
@@ -46,7 +47,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ id: s
   if (!category) notFound();
 
   const Icon = (Icons[category.icon as keyof typeof Icons] as LucideIcon) ?? Icons.Sparkles;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://theaioffice.app";
+  const siteUrl = getSiteUrl();
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">

@@ -6,10 +6,11 @@ import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { CommandPalette } from "@/components/command-palette";
 import { Toaster } from "sonner";
+import { getSiteUrl } from "@/lib/site";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://theaioffice.app";
+const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

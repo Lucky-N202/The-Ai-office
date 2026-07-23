@@ -31,6 +31,10 @@ export function SubmitForm() {
 
     if (res.ok) {
       setStatus("success");
+    } else if (res.status === 429) {
+      const data = await res.json().catch(() => null);
+      setError(data?.error ?? "Too many submissions from you recently. Please try again later.");
+      setStatus("error");
     } else {
       const data = await res.json().catch(() => null);
       setError(data?.error ? "Please check your inputs and try again." : "Something went wrong. Please try again.");

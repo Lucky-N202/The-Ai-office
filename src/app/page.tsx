@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { getSiteUrl } from "@/lib/site";
 import { ToolCard } from "@/components/tool-card";
 import { CategoryGrid } from "@/components/category-grid";
 import { JsonLd } from "@/components/json-ld";
@@ -36,10 +37,10 @@ export default async function HomePage() {
           "@context": "https://schema.org",
           "@type": "WebSite",
           name: "The AI Office",
-          url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://theaioffice.app",
+          url: getSiteUrl(),
           potentialAction: {
             "@type": "SearchAction",
-            target: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://theaioffice.app"}/browse/tools/all?q={search_term_string}`,
+            target: `${getSiteUrl()}/browse/tools/all?q={search_term_string}`,
             "query-input": "required name=search_term_string",
           },
         }}
