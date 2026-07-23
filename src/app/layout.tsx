@@ -35,6 +35,9 @@ export const metadata: Metadata = {
   verification: {
     google: "Zoy5kKqQ-jj40RcDQsahBjHK3Z-i2h_ILVweO6Rxp38",
   },
+  other: {
+    "msvalidate.01": "D6DFCC66773F7312797FC9B0F7BA8F39",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
