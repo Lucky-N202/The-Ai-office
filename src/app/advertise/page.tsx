@@ -6,6 +6,16 @@ import { Button } from "@/components/ui/button";
 export const metadata: Metadata = {
   title: "Advertise Your AI Tool",
   description: "Get your AI tool featured in front of a curated, high-intent audience actively comparing tools.",
+  openGraph: {
+    title: "Advertise Your AI Tool — The AI Office",
+    description: "Get your AI tool featured in front of a curated, high-intent audience actively comparing tools.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Advertise Your AI Tool — The AI Office",
+    description: "Get your AI tool featured in front of a curated, high-intent audience actively comparing tools.",
+  },
 };
 
 export const revalidate = 3600;
