@@ -1,11 +1,27 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  // "native" covers your local machine (Windows/macOS/Linux glibc); "linux-musl-openssl-3.0.x"
+  // is required for the node:*-alpine base image used in the Docker build below.
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum PricingModel {
+  FREE
+  FREEMIUM
+  PAID
+  ENTERPRISE
+  OPEN_SOURCE
 }
 
 model User {
@@ -16,9 +32,9 @@ model User {
   image         String?
   role          Role       @default(USER)
   createdAt     DateTime   @default(now())
-  accounts      Account[]
   bookmarks     Bookmark[]
   reviews       Review[]
+  accounts      Account[]
   sessions      Session[]
 }
 
@@ -28,12 +44,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String?
-  access_token      String?
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String?
+  id_token          String? @db.Text
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -53,8 +69,8 @@ model Category {
   name        String   @unique
   slug        String   @unique
   description String
-  icon        String
-  color       String
+  icon        String // lucide-react icon name
+  color       String // hex accent color
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   tools       Tool[]
@@ -65,8 +81,13 @@ model Tool {
   name          String
   slug          String       @unique
   tagline       String
-  description   String
+  description   String       @db.Text
   websiteUrl    String
+  // Optional affiliate/referral link. When set, outbound "Visit Website"
+  // clicks route through it instead of websiteUrl (see /out/[id]). Leave null
+  // until you're actually accepted into a tool's affiliate program.
+  affiliateUrl  String?
+  clickCount    Int          @default(0)
   logoUrl       String
   pricingModel  PricingModel @default(FREEMIUM)
   startingPrice Float?
@@ -79,11 +100,11 @@ model Tool {
   featured      Boolean      @default(false)
   verified      Boolean      @default(true)
   categoryId    String
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
+  category      Category     @relation(fields: [categoryId], references: [id])
   bookmarks     Bookmark[]
   reviews       Review[]
-  category      Category     @relation(fields: [categoryId], references: [id])
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 
   @@index([categoryId])
   @@index([featured])
@@ -93,22 +114,28 @@ model Review {
   id        String   @id @default(cuid())
   rating    Int
   title     String
-  body      String
+  body      String   @db.Text
   toolId    String
-  userId    String
-  createdAt DateTime @default(now())
   tool      Tool     @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 
   @@unique([toolId, userId])
   @@index([toolId])
+}
+
+enum SubmissionStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 model ToolSubmission {
   id             String           @id @default(cuid())
   name           String
   tagline        String
-  description    String
+  description    String           @db.Text
   websiteUrl     String
   submitterEmail String
   status         SubmissionStatus @default(PENDING)
@@ -121,29 +148,10 @@ model ToolSubmission {
 model Bookmark {
   id        String   @id @default(cuid())
   userId    String
-  toolId    String
-  createdAt DateTime @default(now())
-  tool      Tool     @relation(fields: [toolId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  toolId    String
+  tool      Tool     @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 
   @@unique([userId, toolId])
-}
-
-enum Role {
-  USER
-  ADMIN
-}
-
-enum PricingModel {
-  FREE
-  FREEMIUM
-  PAID
-  ENTERPRISE
-  OPEN_SOURCE
-}
-
-enum SubmissionStatus {
-  PENDING
-  APPROVED
-  REJECTED
 }
