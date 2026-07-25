@@ -45,8 +45,9 @@ See `.env.example`. In production, use a pooled `DATABASE_URL` (Neon/Supabase/Ve
 
 ## Database
 
-- `prisma/schema.prisma` — `User`, `Account`, `Session` (Auth.js), `Category`, `Tool`, `Review`, `Bookmark`
+- `prisma/schema.prisma` — `User`, `Account`, `Session` (Auth.js), `Category`, `Tool`, `Review`, `Bookmark`, `ToolSubmission`
 - `prisma/seed.ts` — 10 categories, 24 real AI tools (Claude, ChatGPT, Gemini, GitHub Copilot, Cursor, Midjourney, ElevenLabs, Runway, Perplexity, etc.) with real taglines, pricing, features, pros/cons
+- `prisma.config.ts` — the modern, non-deprecated way to configure the Prisma CLI (schema path, migrations path, seed command, datasource URL). This replaced the old `"prisma": {}` block in `package.json`, which Prisma 7 removes entirely. It reads `DATABASE_URL`/`DIRECT_URL` via `dotenv/config`, so make sure `.env` is populated before running any `prisma` CLI command — unlike the old flow, the CLI no longer auto-loads `.env` for you.
 
 To promote a user to admin after they sign in once:
 
@@ -78,12 +79,56 @@ prisma/
   deploy.yml                        # prisma migrate deploy + vercel deploy --prod
 ```
 
+## Running with Docker
+
+A full Docker setup is included — useful for local dev without installing Postgres/Node natively, and as a self-hostable alternative to Vercel. The image installs and builds with **Bun** (fast), but the actual production server runs on real **Node.js** — see the comment block above the `runner` stage in the `Dockerfile` for why (short version: Next.js's standalone output assumes real Node, and Bun's own Docker images don't bundle it — only a compatibility shim that's had documented breakage with Next's standalone server).
+
+**One-time setup:** if you don't already have a `bun.lock` committed, generate one locally (requires [Bun](https://bun.sh) installed on your host once, just for this):
+```bash
+bun install
+```
+Commit the resulting `bun.lock` — the Docker build uses `bun install --frozen-lockfile`, which requires it to exist and match `package.json` exactly.
+
+**Local development** (hot reload, Postgres included):
+```bash
+cp .env.example .env   # fill in AUTH_SECRET / AUTH_GITHUB_ID / AUTH_GITHUB_SECRET
+npm run docker:up          # builds and starts db + web
+npm run docker:migrate     # applies Prisma migrations (one-off)
+npm run docker:seed        # loads the 24 seeded tools
+```
+Visit `http://localhost:3000`. Source is bind-mounted, so edits on your machine hot-reload inside the container. `node_modules` and `.next` live entirely inside the container's own filesystem (anonymous volumes) — not on your host — so this sidesteps Windows/antivirus install issues entirely.
+
+```bash
+npm run docker:down   # stop everything
+```
+
+**Production image** (standalone, runs anywhere Docker does):
+```bash
+npm run docker:build:prod
+docker run -p 3000:3000 \
+  -e DATABASE_URL="postgresql://..." \
+  -e DIRECT_URL="postgresql://..." \
+  -e AUTH_SECRET="..." \
+  -e AUTH_GITHUB_ID="..." \
+  -e AUTH_GITHUB_SECRET="..." \
+  -e NEXTAUTH_URL="https://yourdomain.com" \
+  -e NEXT_PUBLIC_SITE_URL="https://yourdomain.com" \
+  the-ai-office
+```
+Run migrations against your real database once, separately, before starting containers from a new schema version — the production image intentionally doesn't run migrations on boot (avoids multiple replicas racing to migrate simultaneously):
+```bash
+DATABASE_URL="..." DIRECT_URL="..." npx prisma migrate deploy
+```
+
+CI builds the production image (`target: runner`) on every push to catch Dockerfile breakage — see `.github/workflows/ci.yml`.
+
 ## Deploying to Vercel
 
 1. Push this repo to GitHub.
 2. Import the repo in Vercel → framework preset **Next.js** is auto-detected.
 3. Add environment variables in Vercel Project Settings (Production + Preview):
-   `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`, `NEXTAUTH_URL`, `NEXT_PUBLIC_SITE_URL`
+   `DATABASE_URL`, `DIRECT_URL`, `AUTH_SECRET`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`, `NEXTAUTH_URL`.
+   `NEXT_PUBLIC_SITE_URL` is now **optional** — if unset, canonical URLs/OG tags/sitemap automatically use Vercel's own deployment URL instead of a hardcoded placeholder (see `src/lib/site.ts`). Set it explicitly once you attach a real custom domain.
 4. Provision Postgres (Vercel Postgres, Neon, or Supabase) and run `npx prisma migrate deploy && npm run db:seed` once against it.
 5. For GitHub Actions CD, add repo secrets `VERCEL_TOKEN`, `DATABASE_URL`, `DIRECT_URL`, and link the project with `vercel link` locally to generate `.vercel/project.json` (commit `.vercel/project.json`'s `orgId`/`projectId` or set `VERCEL_ORG_ID`/`VERCEL_PROJECT_ID` as secrets).
 
@@ -109,4 +154,3 @@ prisma/
 - After pulling this update, run `npx prisma migrate dev` (or `db push`) again — the `ToolSubmission` model is new and needs a migration applied to your database.
 - Tool logos in the seed data use Google's unauthenticated favicon service (`google.com/s2/favicons?domain=...&sz=128`) — zero setup required, but icons are small/low-res. For higher-quality logos, sign up for a free [logo.dev](https://logo.dev) publishable key, swap the seed URLs to `https://img.logo.dev/{domain}?token=YOUR_KEY`, and add `img.logo.dev` back to `images.remotePatterns` in `next.config.ts`. (The old Clearbit Logo API this project's first draft assumed was free was permanently shut down in December 2025 — logo.dev, its official successor, now requires an account.)
 - `og-image.png` and PWA icons in `/public` are referenced in metadata but not included as binary assets — add your own before going live.
-
