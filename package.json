@@ -21,6 +21,7 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.115.0",
     "@auth/prisma-adapter": "^2.7.4",
     "@prisma/client": "^6.3.0",
     "@upstash/ratelimit": "^2.0.8",
