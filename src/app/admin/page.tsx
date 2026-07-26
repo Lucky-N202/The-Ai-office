@@ -1,12 +1,13 @@
 import { prisma } from "@/lib/prisma";
 
 export default async function AdminOverview() {
-  const [toolCount, categoryCount, reviewCount, userCount, pendingSubmissions] = await Promise.all([
+  const [toolCount, categoryCount, reviewCount, userCount, pendingSubmissions, pendingChanges] = await Promise.all([
     prisma.tool.count(),
     prisma.category.count(),
     prisma.review.count(),
     prisma.user.count(),
     prisma.toolSubmission.count({ where: { status: "PENDING" } }),
+    prisma.toolChange.count({ where: { status: "PENDING_REVIEW" } }),
   ]);
 
   const stats = [
@@ -15,6 +16,7 @@ export default async function AdminOverview() {
     { label: "Reviews", value: reviewCount },
     { label: "Users", value: userCount },
     { label: "Pending Submissions", value: pendingSubmissions },
+    { label: "Pending Changes", value: pendingChanges },
   ];
 
   return (

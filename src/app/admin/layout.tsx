@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { LayoutGrid, Wrench, FolderTree, MessageSquare, Inbox } from "lucide-react";
+import { LayoutGrid, Wrench, FolderTree, MessageSquare, Inbox, Radar } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -10,6 +10,7 @@ const links = [
   { href: "/admin/categories", label: "Categories", icon: FolderTree },
   { href: "/admin/reviews", label: "Reviews", icon: MessageSquare },
   { href: "/admin/submissions", label: "Submissions", icon: Inbox },
+  { href: "/admin/changes", label: "Changes", icon: Radar },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -18,21 +19,32 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect("/login?callbackUrl=/admin");
   }
 
-  const pendingCount = await prisma.toolSubmission.count({ where: { status: "PENDING" } });
+  const [pendingSubmissions, pendingChanges] = await Promise.all([
+    prisma.toolSubmission.count({ where: { status: "PENDING" } }),
+    prisma.toolChange.count({ where: { status: "PENDING_REVIEW" } }),
+  ]);
+
+  const pendingCounts: Record<string, number> = {
+    Submissions: pendingSubmissions,
+    Changes: pendingChanges,
+  };
 
   return (
     <div className="mx-auto flex max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:px-8">
       <aside className="hidden w-56 shrink-0 md:block">
         <p className="mb-4 px-3 text-xs font-semibold uppercase tracking-wider text-[var(--color-muted-2)]">Admin</p>
         <nav className="space-y-1">
-          {links.map(({ href, label, icon: Icon }) => (
-            <Link key={href} href={href} className="flex items-center justify-between rounded-[14px] px-3 py-2 text-sm text-[var(--color-muted)] hover:bg-white/[0.04] hover:text-[var(--color-foreground)]">
-              <span className="flex items-center gap-2.5"><Icon size={15} /> {label}</span>
-              {label === "Submissions" && pendingCount > 0 && (
-                <span className="rounded-full bg-[var(--color-primary)] px-1.5 py-0.5 text-[10px] font-medium text-white">{pendingCount}</span>
-              )}
-            </Link>
-          ))}
+          {links.map(({ href, label, icon: Icon }) => {
+            const count = pendingCounts[label];
+            return (
+              <Link key={href} href={href} className="flex items-center justify-between rounded-[14px] px-3 py-2 text-sm text-[var(--color-muted)] hover:bg-white/[0.04] hover:text-[var(--color-foreground)]">
+                <span className="flex items-center gap-2.5"><Icon size={15} /> {label}</span>
+                {Boolean(count) && (
+                  <span className="rounded-full bg-[var(--color-primary)] px-1.5 py-0.5 text-[10px] font-medium text-white">{count}</span>
+                )}
+              </Link>
+            );
+          })}
         </nav>
       </aside>
       <div className="min-w-0 flex-1">{children}</div>

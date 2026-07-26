@@ -132,6 +132,33 @@ CI builds the production image (`target: runner`) on every push to catch Dockerf
 4. Provision Postgres (Vercel Postgres, Neon, or Supabase) and run `npx prisma migrate deploy && npm run db:seed` once against it.
 5. For GitHub Actions CD, add repo secrets `VERCEL_TOKEN`, `DATABASE_URL`, `DIRECT_URL`, and link the project with `vercel link` locally to generate `.vercel/project.json` (commit `.vercel/project.json`'s `orgId`/`projectId` or set `VERCEL_ORG_ID`/`VERCEL_PROJECT_ID` as secrets).
 
+## Intelligence Engine
+
+An automated pipeline that keeps tool listings current without manual upkeep: discovers changes on each tool's own official source, verifies them by diffing the primary source directly (not third-party claims), uses an LLM to summarize only substantive changes, keeps a full version history, auto-applies narrow low-risk updates, and queues everything else for admin review.
+
+**How it works** (`src/app/api/cron/discover/route.ts`):
+1. Each run pulls a batch of tools (default 15), oldest-checked-first (`Tool.lastCheckedAt`) — this is what makes it scale to a large catalog within a serverless function's time limit: every run makes progress, the next run continues where the last left off.
+2. For each tool's `websiteUrl` (and `docsUrl` if set), fetches and extracts readable text (`src/lib/intelligence/extract.ts`), hashes it, and compares against the most recent `ToolSnapshot` for that source.
+3. Unchanged → skip, no AI call, no cost. Changed → store the new snapshot (this is the append-only version history — nothing is ever overwritten) and send both versions to Claude (`src/lib/intelligence/analyze.ts`) for a structured, confidence-scored summary.
+4. A `ToolChange` record is created either way. If confidence is high **and** the change is narrowly pricing-related, it's auto-applied and the affected pages are revalidated immediately (`revalidatePath`). Everything else — including every features/rebrand/shutdown change regardless of confidence — goes to `/admin/changes` for a human decision, with an optional email notification.
+
+**Setup:**
+1. Get an Anthropic API key (console.anthropic.com) → `ANTHROPIC_API_KEY`.
+2. Generate a cron secret: `openssl rand -base64 32` → set as `CRON_SECRET` in both `.env` and Vercel's env vars.
+3. (Optional) Resend account (resend.com, free tier) for email notifications → `RESEND_API_KEY` + `ADMIN_NOTIFICATION_EMAIL`. **Verify your sending domain in Resend's dashboard first** — `src/lib/intelligence/notify.ts` sends from `notifications@the-ai-office.com`; update that address if you use a different domain, and note sends will silently fail (by design — see below) until the domain's verified.
+4. `vercel.json` already schedules the cron for 6am UTC daily. Push and deploy — Vercel picks this up automatically, no dashboard config needed.
+5. **Run a migration first** — `Tool.docsUrl`, `Tool.lastCheckedAt`, and the new `ToolSnapshot`/`ToolChange` models are new:
+   ```bash
+   npx prisma db push
+   ```
+
+**Honest constraints, not glossed over:**
+- **"Continuous" isn't literal on Vercel's free tier** — Hobby plan cron jobs run at most once/day. This is built for daily by default; if you're on Pro, you can tighten `vercel.json`'s schedule to run more frequently (e.g. hourly) and the same batching logic just cycles through your catalog faster.
+- **Every AI call costs money.** Cost scales with how often tools' pages actually change, not with catalog size — unchanged tools never reach the LLM call. Still, budget for it if you have hundreds+ of tools.
+- **Scraping is best-effort.** Sites that render pricing via JavaScript (a simple `fetch` can't see it), block bots, or heavily restructure their pages can produce false negatives (missed real changes) or noise (flagged non-changes) — the LLM step filters out most boilerplate/cookie-banner noise, but isn't perfect. This is why manual review exists as a real safety net, not a formality — expect to actually use `/admin/changes` early on, especially before you've seen how a given tool's site behaves over a few runs.
+- **The auto-apply allowlist is deliberately narrow** (`AUTO_APPLY_CHANGE_TYPES` in `route.ts`, `SuggestedUpdates` type in `analyze.ts`) — currently only `startingPrice` and `tagline`, and only above 85% confidence. Widen this only deliberately; it's the entire safety mechanism between "saves you time" and "silently corrupts your listings."
+- **Test it manually before trusting the schedule**: `curl -H "Authorization: Bearer $CRON_SECRET" https://yourdomain.com/api/cron/discover` — returns a JSON summary of what it did. First run on each tool just establishes a baseline snapshot (nothing to diff against yet), so you won't see real change detection until the second run after something's actually changed.
+
 ## Monetization
 
 - `/advertise` — public pricing page for tool vendors (Verified badge, Featured placement). Pricing is a placeholder in `src/app/advertise/page.tsx` — tune it to whatever the market bears. CTAs currently point at a `mailto:` link; once you set up a [Stripe Payment Link](https://dashboard.stripe.com/payment-links) (no backend/webhook code needed for a v1), swap the `href` in that file for the Payment Link URL.

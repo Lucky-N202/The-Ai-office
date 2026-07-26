@@ -83,6 +83,15 @@ model Tool {
   tagline       String
   description   String       @db.Text
   websiteUrl    String
+  // Optional secondary source to monitor (pricing/docs page) — the Intelligence
+  // Engine watches both websiteUrl and docsUrl for changes when set.
+  docsUrl       String?
+  // Cursor for the discovery cron's round-robin batching — lets the job process
+  // a bounded batch per run (serverless time limits) while still eventually
+  // covering every tool, oldest-checked-first.
+  lastCheckedAt DateTime?
+  snapshots     ToolSnapshot[]
+  changes       ToolChange[]
   // Optional affiliate/referral link. When set, outbound "Visit Website"
   // clicks route through it instead of websiteUrl (see /out/[id]). Leave null
   // until you're actually accepted into a tool's affiliate program.
@@ -108,6 +117,54 @@ model Tool {
 
   @@index([categoryId])
   @@index([featured])
+}
+
+// Full, append-only history of fetched content per monitored source URL.
+// Never deleted/overwritten — this is what makes it a genuine version history
+// rather than just "current vs. one previous" state.
+model ToolSnapshot {
+  id          String   @id @default(cuid())
+  toolId      String
+  tool        Tool     @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  sourceUrl   String
+  contentHash String
+  // Extracted, truncated readable text (not raw HTML) — kept short enough to
+  // stay cheap to store and cheap to pass to the LLM for diffing.
+  content     String   @db.Text
+  fetchedAt   DateTime @default(now())
+
+  @@index([toolId, sourceUrl, fetchedAt])
+}
+
+enum ChangeStatus {
+  PENDING_REVIEW
+  AUTO_APPLIED
+  APPROVED
+  REJECTED
+}
+
+// One row per AI-analyzed content change detected between two snapshots.
+model ToolChange {
+  id               String       @id @default(cuid())
+  toolId           String
+  tool             Tool         @relation(fields: [toolId], references: [id], onDelete: Cascade)
+  sourceUrl        String
+  fromSnapshotId   String?
+  toSnapshotId     String
+  summary          String       @db.Text
+  changeType       String
+  // 0–1, as reported by the LLM. Drives the auto-apply vs. needs-review split.
+  confidence       Float
+  // Partial Tool field updates the AI proposed (e.g. { "startingPrice": 25 }).
+  // Applied verbatim on admin approval, or automatically above the confidence
+  // threshold for low-risk change types — see src/lib/intelligence/analyze.ts.
+  suggestedUpdates Json?
+  status           ChangeStatus @default(PENDING_REVIEW)
+  createdAt        DateTime     @default(now())
+  reviewedAt       DateTime?
+
+  @@index([toolId])
+  @@index([status])
 }
 
 model Review {
