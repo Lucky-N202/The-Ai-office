@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AdSlot } from "@/components/ad-slot";
 
 export const metadata: Metadata = { title: "Privacy Policy" };
 
@@ -23,14 +24,24 @@ export default function PrivacyPage() {
           <p>
             Account data is used solely to provide the service: syncing your bookmarks across devices, attributing
             reviews you write, and gating access to the admin dashboard for authorized team members. We do not
-            sell personal data to third parties, and we do not use your data for advertising.
+            sell personal data to third parties.
           </p>
         </section>
         <section>
-          <h2 className="mb-2 text-lg font-semibold text-[var(--color-foreground)]">Cookies</h2>
+          <h2 className="mb-2 text-lg font-semibold text-[var(--color-foreground)]">Cookies and advertising</h2>
           <p>
-            We use a session cookie to keep you signed in. We don&rsquo;t use third-party advertising or tracking
-            cookies.
+            We use a session cookie to keep you signed in. A small number of informational pages (this page,
+            Contact, Terms, About) may display ads served by Google AdSense. Google and its partners may use
+            cookies to serve ads based on your prior visits to this or other websites. You can opt out of
+            personalized advertising by visiting{" "}
+            <a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)]">
+              Google&rsquo;s Ads Settings
+            </a>{" "}
+            or{" "}
+            <a href="https://optout.aboutads.info" target="_blank" rel="noopener noreferrer" className="text-[var(--color-primary)]">
+              aboutads.info
+            </a>
+            . The core directory, tool pages, and comparison tool never show ads or use advertising cookies.
           </p>
         </section>
         <section>
@@ -46,6 +57,7 @@ export default function PrivacyPage() {
           California (CCPA).
         </p>
       </div>
+      <AdSlot slot="6547099269817646" />
     </div>
   );
 }

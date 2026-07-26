@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
+import { AdSlot } from "@/components/ad-slot";
 
 export const metadata: Metadata = {
   title: "About",
@@ -33,13 +34,16 @@ export default async function AboutPage() {
           &ldquo;Featured&rdquo; are paid placements, and some outbound links are affiliate links that may earn
           us a commission at no extra cost to you — these are always disclosed on the tool&rsquo;s page. Paid
           placement never affects a tool&rsquo;s rating, reviews, or the accuracy of its pros and cons — those
-          stay editorially independent regardless of whether a tool advertises with us.
+          stay editorially independent regardless of whether a tool advertises with us. This page and a few
+          other informational pages may also show Google-served display ads — never the tool directory or
+          comparison pages themselves.
         </p>
         <p>
           Interested in featuring your tool?{" "}
           <a href="/advertise" className="text-[var(--color-primary)]">See advertising options</a>.
         </p>
       </div>
+      <AdSlot slot="6547099269817646" />
     </div>
   );
 }

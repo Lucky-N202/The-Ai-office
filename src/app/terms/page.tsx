@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AdSlot } from "@/components/ad-slot";
 
 export const metadata: Metadata = { title: "Terms of Service" };
 
@@ -44,6 +45,7 @@ export default function TermsPage() {
           relying on it for a live product.
         </p>
       </div>
+      <AdSlot slot="6547099269817646" />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Mail } from "lucide-react";
+import { AdSlot } from "@/components/ad-slot";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -29,6 +30,7 @@ export default function ContactPage() {
           straight to our review queue.
         </p>
       </div>
+      <AdSlot slot="6547099269817646" />
     </div>
   );
 }
