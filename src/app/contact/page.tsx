@@ -30,7 +30,7 @@ export default function ContactPage() {
           straight to our review queue.
         </p>
       </div>
-      <AdSlot slot="0000000001" />
+      <AdSlot slot="1632621766" />
     </div>
   );
 }
