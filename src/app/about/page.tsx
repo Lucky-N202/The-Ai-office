@@ -43,7 +43,7 @@ export default async function AboutPage() {
           <a href="/advertise" className="text-[var(--color-primary)]">See advertising options</a>.
         </p>
       </div>
-      <AdSlot slot="6547099269817646" />
+      <AdSlot slot="0000000000" />
     </div>
   );
 }

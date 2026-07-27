@@ -57,7 +57,7 @@ export default function PrivacyPage() {
           California (CCPA).
         </p>
       </div>
-      <AdSlot slot="6547099269817646" />
+      <AdSlot slot="0000000002" />
     </div>
   );
 }

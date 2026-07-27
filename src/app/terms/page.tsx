@@ -45,7 +45,7 @@ export default function TermsPage() {
           relying on it for a live product.
         </p>
       </div>
-      <AdSlot slot="6547099269817646" />
+      <AdSlot slot="0000000003" />
     </div>
   );
 }
