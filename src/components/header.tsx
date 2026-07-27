@@ -10,6 +10,7 @@ const nav = [
   { href: "/browse/tools/all", label: "Browse" },
   { href: "/browse/compare", label: "Compare" },
   { href: "/#categories", label: "Categories" },
+  { href: "/blog", label: "Blog" },
   { href: "/bookmarks", label: "Saved" },
 ];
 

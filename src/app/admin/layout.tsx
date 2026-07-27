@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { LayoutGrid, Wrench, FolderTree, MessageSquare, Inbox, Radar } from "lucide-react";
+import { LayoutGrid, Wrench, FolderTree, MessageSquare, Inbox, Radar, Newspaper } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
@@ -11,6 +11,7 @@ const links = [
   { href: "/admin/reviews", label: "Reviews", icon: MessageSquare },
   { href: "/admin/submissions", label: "Submissions", icon: Inbox },
   { href: "/admin/changes", label: "Changes", icon: Radar },
+  { href: "/admin/articles", label: "Articles", icon: Newspaper },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -19,14 +20,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect("/login?callbackUrl=/admin");
   }
 
-  const [pendingSubmissions, pendingChanges] = await Promise.all([
+  const [pendingSubmissions, pendingChanges, draftArticles] = await Promise.all([
     prisma.toolSubmission.count({ where: { status: "PENDING" } }),
     prisma.toolChange.count({ where: { status: "PENDING_REVIEW" } }),
+    prisma.article.count({ where: { status: "DRAFT" } }),
   ]);
 
   const pendingCounts: Record<string, number> = {
     Submissions: pendingSubmissions,
     Changes: pendingChanges,
+    Articles: draftArticles,
   };
 
   return (

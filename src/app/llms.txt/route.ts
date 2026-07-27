@@ -5,10 +5,17 @@ export const revalidate = 3600;
 
 export async function GET() {
   const siteUrl = getSiteUrl();
-  const categories = await prisma.category.findMany({
-    include: { tools: { orderBy: { rating: "desc" } } },
-    orderBy: { name: "asc" },
-  });
+  const [categories, articles] = await Promise.all([
+    prisma.category.findMany({
+      include: { tools: { orderBy: { rating: "desc" } } },
+      orderBy: { name: "asc" },
+    }),
+    prisma.article.findMany({
+      where: { status: "PUBLISHED" },
+      orderBy: { publishedAt: "desc" },
+      take: 10,
+    }),
+  ]);
 
   const sections = categories
     .map((category) => {
@@ -18,6 +25,10 @@ export async function GET() {
       return `## ${category.name}\n\n${category.description}\n\n${links}`;
     })
     .join("\n\n");
+
+  const articleLinks = articles
+    .map((a) => `- [${a.title}](${siteUrl}/blog/${a.slug}): ${a.excerpt}`)
+    .join("\n");
 
   const body = `# The AI Office
 
@@ -29,8 +40,13 @@ export async function GET() {
 - [Compare tools](${siteUrl}/browse/compare): Side-by-side feature and pricing comparison
 - [Submit a tool](${siteUrl}/submit): Suggest a tool for the directory
 - [Advertise](${siteUrl}/advertise): Featured placement and advertising options for tool vendors
+- [Blog](${siteUrl}/blog): Weekly roundups of what's new and changed across AI tools
 
 ${sections}
+
+## Recent Blog Articles
+
+${articleLinks || "(none published yet)"}
 `;
 
   return new Response(body, {

@@ -1,13 +1,15 @@
 import { prisma } from "@/lib/prisma";
 
 export default async function AdminOverview() {
-  const [toolCount, categoryCount, reviewCount, userCount, pendingSubmissions, pendingChanges] = await Promise.all([
+  const [toolCount, categoryCount, reviewCount, userCount, pendingSubmissions, pendingChanges, subscriberCount, draftArticles] = await Promise.all([
     prisma.tool.count(),
     prisma.category.count(),
     prisma.review.count(),
     prisma.user.count(),
     prisma.toolSubmission.count({ where: { status: "PENDING" } }),
     prisma.toolChange.count({ where: { status: "PENDING_REVIEW" } }),
+    prisma.newsletterSubscriber.count({ where: { unsubscribedAt: null } }),
+    prisma.article.count({ where: { status: "DRAFT" } }),
   ]);
 
   const stats = [
@@ -17,6 +19,8 @@ export default async function AdminOverview() {
     { label: "Users", value: userCount },
     { label: "Pending Submissions", value: pendingSubmissions },
     { label: "Pending Changes", value: pendingChanges },
+    { label: "Newsletter Subscribers", value: subscriberCount },
+    { label: "Draft Articles", value: draftArticles },
   ];
 
   return (

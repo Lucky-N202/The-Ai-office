@@ -159,6 +159,18 @@ An automated pipeline that keeps tool listings current without manual upkeep: di
 - **The auto-apply allowlist is deliberately narrow** (`AUTO_APPLY_CHANGE_TYPES` in `route.ts`, `SuggestedUpdates` type in `analyze.ts`) — currently only `startingPrice` and `tagline`, and only above 85% confidence. Widen this only deliberately; it's the entire safety mechanism between "saves you time" and "silently corrupts your listings."
 - **Test it manually before trusting the schedule**: `curl -H "Authorization: Bearer $CRON_SECRET" https://yourdomain.com/api/cron/discover` — returns a JSON summary of what it did. First run on each tool just establishes a baseline snapshot (nothing to diff against yet), so you won't see real change detection until the second run after something's actually changed.
 
+## Blog & Newsletter
+
+A weekly content pipeline, built on top of the Intelligence Engine's own data: `/api/cron/weekly-digest` (scheduled Mondays 8am UTC in `vercel.json`) pulls the past 7 days of `ToolChange` records and newly-added tools, asks Claude to draft a factual roundup, and saves it as a **draft** `Article` — it never auto-publishes and never auto-emails. An admin reviews it at `/admin/articles/[id]`, edits if needed, and clicks **Publish & Send to Subscribers**, which is the one and only action that emails the newsletter list (`src/lib/newsletter/send.ts`).
+
+- `/blog` and `/blog/[slug]` — public pages, ISR-cached, full SEO metadata + `Article` JSON-LD, included in the sitemap.
+- You can also write articles entirely by hand from `/admin/articles/new` — the AI digest is one input to this system, not the only way content gets published.
+- Newsletter signup (`src/components/newsletter-form.tsx`) is on `/blog` and every published article — subscribers are stored in `NewsletterSubscriber`, with a one-click, no-login unsubscribe link in every email footer (required for CAN-SPAM/GDPR compliance, not optional).
+- Uses the **same** `ANTHROPIC_API_KEY`, `RESEND_API_KEY`, `ADMIN_NOTIFICATION_EMAIL`, and `CRON_SECRET` as the Intelligence Engine — nothing new to configure if you've already set that up.
+- **Vercel Hobby plan allows at most 2 cron jobs** — this is the second one (`/api/cron/discover` is the first), so you're now at the Hobby-plan limit. If you want to add more scheduled jobs later, that requires Pro.
+- **AdSense note**: `/blog/[slug]` shows an ad slot (`0000000004` placeholder — replace with a real AdSense slot ID same as the other four). Blog content is a genuinely appropriate place for this, distinct from the money pages (directory, tool pages, `/advertise`) that stay ad-free.
+- Run a migration for the new tables: `npx prisma db push`.
+
 ## Monetization
 
 - **Google AdSense** — deliberately scoped to `/about`, `/contact`, `/privacy`, `/terms` only, never the directory, tool pages, comparison tool, or `/advertise` itself. Rationale: those pages are what earns real money (Featured placement, affiliate clicks), and the pitch to paying vendors is exclusivity — showing a competitor's programmatic ad next to a Featured listing directly undermines that. Set `NEXT_PUBLIC_ADSENSE_CLIENT_ID` to enable; leave it unset and `src/components/ad-slot.tsx` renders nothing, `/ads.txt` returns empty, and the CSP stays at its default strictness (see the `adsenseEnabled` conditional in `next.config.ts` — the CSP only widens to allow Google's ad-serving domains when this env var is actually set at build time). Ad slot IDs in the four pages above are placeholders (`0000000000`–`0000000003`) — replace with real slot IDs once you've created ad units in your AdSense dashboard. `/privacy` already discloses the AdSense cookie usage and opt-out links — required by AdSense's program policies, not just good practice.
