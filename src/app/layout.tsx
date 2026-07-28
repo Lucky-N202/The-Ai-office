@@ -8,6 +8,7 @@ import { CommandPalette } from "@/components/command-palette";
 import { Toaster } from "sonner";
 import { getSiteUrl } from "@/lib/site";
 import { AdSenseScript } from "@/components/adsense-script";
+import { Analytics } from '@vercel/analytics/next';
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
 
@@ -53,6 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Footer />
           <Toaster theme="dark" position="bottom-right" />
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
