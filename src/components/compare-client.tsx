@@ -32,8 +32,8 @@ export function CompareClient({ tools }: { tools: ToolSummary[] }) {
               onClick={() => toggle(tool.id)}
               disabled={!active && selected.length >= MAX_COMPARE}
               className={cn(
-                "focus-ring flex items-center gap-1.5 rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-40",
-                active && "border-[var(--color-primary)] bg-[var(--color-primary-muted)] text-[var(--color-primary)]"
+                "focus-ring flex items-center gap-1.5 rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs transition-colors hover:border-[var(--color-border-hover)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-[var(--color-border)]",
+                active && "border-[var(--color-primary)] bg-[var(--color-primary-muted)] text-[var(--color-primary)] hover:border-[var(--color-primary)]"
               )}
             >
               {tool.name}

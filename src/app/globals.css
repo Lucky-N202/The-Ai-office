@@ -90,6 +90,20 @@ html.light {
     border-color: var(--color-border-hover);
   }
 
+  /* For card-surface elements that are actually clickable (link to a page,
+     trigger an action) — layer this on top of .card-surface for a clearly
+     visible "this is interactive" signal. Deliberately not merged into
+     .card-surface itself, since that class is also used for purely
+     informational containers (stat panels, pricing cards) where this
+     stronger hover would misleadingly imply they're clickable. */
+  .card-interactive {
+    cursor: pointer;
+  }
+  .card-interactive:hover {
+    border-color: var(--color-primary);
+    background: color-mix(in oklab, var(--color-card) 92%, var(--color-primary) 8%);
+  }
+
   .btn-primary {
     background: var(--color-primary);
     color: white;

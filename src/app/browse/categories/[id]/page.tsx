@@ -36,8 +36,19 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return {
     title: `Best ${category.name} AI Tools`,
     description: category.description,
+    keywords: [category.name, "AI tools", `best ${category.name.toLowerCase()} AI tools`],
     alternates: { canonical: `${siteUrl}/browse/categories/${category.id}` },
-    openGraph: { title: `Best ${category.name} AI Tools`, description: category.description },
+    openGraph: {
+      title: `Best ${category.name} AI Tools`,
+      description: category.description,
+      url: `${siteUrl}/browse/categories/${category.id}`,
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `Best ${category.name} AI Tools`,
+      description: category.description,
+    },
   };
 }
 
@@ -58,6 +69,15 @@ export default async function CategoryPage({ params }: { params: Promise<{ id: s
           name: `Best ${category.name} AI Tools`,
           description: category.description,
           url: `${siteUrl}/browse/categories/${category.id}`,
+          mainEntity: {
+            "@type": "ItemList",
+            itemListElement: category.tools.map((tool, i) => ({
+              "@type": "ListItem",
+              position: i + 1,
+              url: `${siteUrl}/browse/tools/${tool.slug}`,
+              name: tool.name,
+            })),
+          },
         }}
       />
       <Link href="/#categories" className="mb-6 inline-flex items-center gap-1.5 text-sm text-[var(--color-muted)] hover:text-[var(--color-foreground)]">

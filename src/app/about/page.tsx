@@ -5,6 +5,16 @@ import { AdSlot } from "@/components/ad-slot";
 export const metadata: Metadata = {
   title: "About",
   description: "The AI Office is a curated directory for discovering, comparing, and bookmarking the best AI tools.",
+  openGraph: {
+    title: "About — The AI Office",
+    description: "The AI Office is a curated directory for discovering, comparing, and bookmarking the best AI tools.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "About — The AI Office",
+    description: "The AI Office is a curated directory for discovering, comparing, and bookmarking the best AI tools.",
+  },
 };
 
 export default async function AboutPage() {

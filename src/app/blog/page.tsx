@@ -9,6 +9,16 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: "Blog",
   description: "Weekly roundups of what's new and changed across the AI tools landscape.",
+  openGraph: {
+    title: "Blog — The AI Office",
+    description: "Weekly roundups of what's new and changed across the AI tools landscape.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Blog — The AI Office",
+    description: "Weekly roundups of what's new and changed across the AI tools landscape.",
+  },
 };
 
 export default async function BlogPage() {
@@ -37,7 +47,7 @@ export default async function BlogPage() {
       ) : (
         <div className="space-y-6">
           {articles.map((article) => (
-            <Link key={article.id} href={`/blog/${article.slug}`} className="card-surface block p-6">
+            <Link key={article.id} href={`/blog/${article.slug}`} className="card-surface card-interactive block p-6">
               <div className="mb-2 flex items-center gap-2 text-xs text-[var(--color-muted-2)]">
                 <span>{article.publishedAt?.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</span>
                 {article.aiGenerated && <Badge>AI-assisted</Badge>}

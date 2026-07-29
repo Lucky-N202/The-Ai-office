@@ -4,6 +4,16 @@ import { SubmitForm } from "@/components/submit-form";
 export const metadata: Metadata = {
   title: "Submit a Tool",
   description: "Know an AI tool that should be in the directory? Submit it for review.",
+  openGraph: {
+    title: "Submit a Tool — The AI Office",
+    description: "Know an AI tool that should be in the directory? Submit it for review.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Submit a Tool — The AI Office",
+    description: "Know an AI tool that should be in the directory? Submit it for review.",
+  },
 };
 
 export default function SubmitPage() {

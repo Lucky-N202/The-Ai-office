@@ -22,7 +22,7 @@ export function CategoryGrid({ categories }: { categories: (Category & { _count?
           >
             <Link
               href={`/browse/categories/${category.id}`}
-              className="card-surface flex h-full flex-col items-start gap-3 p-5"
+              className="card-surface card-interactive flex h-full flex-col items-start gap-3 p-5"
             >
               <div
                 className="flex h-10 w-10 items-center justify-center rounded-xl"

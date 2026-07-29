@@ -7,6 +7,16 @@ export const revalidate = 1800;
 export const metadata: Metadata = {
   title: "Compare AI Tools Side by Side",
   description: "Compare features, pricing, and ratings across AI tools to find the best fit for your workflow.",
+  openGraph: {
+    title: "Compare AI Tools Side by Side — The AI Office",
+    description: "Compare features, pricing, and ratings across AI tools to find the best fit for your workflow.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Compare AI Tools Side by Side — The AI Office",
+    description: "Compare features, pricing, and ratings across AI tools to find the best fit for your workflow.",
+  },
 };
 
 export default async function ComparePage() {

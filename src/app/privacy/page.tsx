@@ -1,7 +1,20 @@
 import type { Metadata } from "next";
 import { AdSlot } from "@/components/ad-slot";
 
-export const metadata: Metadata = { title: "Privacy Policy" };
+export const metadata: Metadata = {
+  title: "Privacy Policy",
+  description: "How The AI Office handles your data.",
+  openGraph: {
+    title: "Privacy Policy — The AI Office",
+    description: "How The AI Office handles your data.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Privacy Policy — The AI Office",
+    description: "How The AI Office handles your data.",
+  },
+};
 
 export default function PrivacyPage() {
   return (

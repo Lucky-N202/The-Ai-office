@@ -1,7 +1,20 @@
 import type { Metadata } from "next";
 import { AdSlot } from "@/components/ad-slot";
 
-export const metadata: Metadata = { title: "Terms of Service" };
+export const metadata: Metadata = {
+  title: "Terms of Service",
+  description: "Terms of service for using The AI Office.",
+  openGraph: {
+    title: "Terms of Service — The AI Office",
+    description: "Terms of service for using The AI Office.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Terms of Service — The AI Office",
+    description: "Terms of service for using The AI Office.",
+  },
+};
 
 export default function TermsPage() {
   return (

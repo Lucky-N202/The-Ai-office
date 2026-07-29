@@ -34,11 +34,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const siteUrl = getSiteUrl();
   return {
     title: `${tool.name} — ${tool.tagline}`,
-    description: tool.description.slice(0, 155),
+    description: tool.tagline,
+    keywords: [tool.name, tool.category.name, ...tool.tags],
     alternates: { canonical: `${siteUrl}/browse/tools/${tool.slug}` },
     openGraph: {
       title: `${tool.name} — ${tool.tagline}`,
-      description: tool.description.slice(0, 155),
+      description: tool.tagline,
       url: `${siteUrl}/browse/tools/${tool.slug}`,
       images: [{ url: tool.logoUrl }],
       type: "website",
@@ -71,7 +72,10 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
           applicationCategory: tool.category.name,
           url: `${siteUrl}/browse/tools/${tool.slug}`,
           image: tool.logoUrl,
+          datePublished: tool.createdAt.toISOString(),
           dateModified: tool.updatedAt.toISOString(),
+          keywords: tool.tags.join(", "),
+          featureList: tool.features,
           offers: {
             "@type": "Offer",
             price: tool.startingPrice ?? 0,

@@ -17,7 +17,7 @@ export function ToolCard({ tool, index = 0 }: { tool: ToolSummary; index?: numbe
       viewport={{ once: true, margin: "-40px" }}
       transition={{ duration: 0.45, delay: Math.min(index * 0.04, 0.3), ease: [0.16, 1, 0.3, 1] }}
       whileHover={{ y: -4 }}
-      className="card-surface group relative flex h-full flex-col p-5"
+      className="card-surface card-interactive group relative flex h-full flex-col p-5"
     >
       <Link href={`/browse/tools/${tool.slug}`} className="flex h-full flex-col">
         <div className="mb-4 flex items-start justify-between">

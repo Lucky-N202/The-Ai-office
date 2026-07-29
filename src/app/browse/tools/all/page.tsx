@@ -7,6 +7,16 @@ export const revalidate = 1800;
 export const metadata: Metadata = {
   title: "Browse All AI Tools",
   description: "Filter and search every AI tool in our directory by category, pricing, and rating.",
+  openGraph: {
+    title: "Browse All AI Tools — The AI Office",
+    description: "Filter and search every AI tool in our directory by category, pricing, and rating.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Browse All AI Tools — The AI Office",
+    description: "Filter and search every AI tool in our directory by category, pricing, and rating.",
+  },
 };
 
 export default async function AllToolsPage({

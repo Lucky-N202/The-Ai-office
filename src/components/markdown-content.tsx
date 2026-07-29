@@ -15,7 +15,17 @@ export function MarkdownContent({ content }: { content: string }) {
           h1: (props) => <h2 className="mt-8 mb-3 text-2xl font-bold text-[var(--color-foreground)]" {...props} />,
           h2: (props) => <h3 className="mt-6 mb-2 text-xl font-semibold text-[var(--color-foreground)]" {...props} />,
           h3: (props) => <h4 className="mt-5 mb-2 text-lg font-semibold text-[var(--color-foreground)]" {...props} />,
-          a: (props) => <a className="text-[var(--color-primary)]" target="_blank" rel="noopener noreferrer" {...props} />,
+          a: ({ href, ...rest }) => {
+            const isInternal = href?.startsWith("/") ?? false;
+            return (
+              <a
+                href={href}
+                className="text-[var(--color-primary)]"
+                {...(isInternal ? {} : { target: "_blank", rel: "noopener noreferrer" })}
+                {...rest}
+              />
+            );
+          },
           code: (props) => <code className="rounded bg-white/[0.06] px-1.5 py-0.5 text-sm text-[var(--color-foreground)]" {...props} />,
           ul: (props) => <ul className="list-disc space-y-1 pl-5" {...props} />,
           ol: (props) => <ol className="list-decimal space-y-1 pl-5" {...props} />,

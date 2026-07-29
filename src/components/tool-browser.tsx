@@ -53,7 +53,7 @@ export function ToolBrowser({
         <div className="mb-6 flex flex-wrap gap-2">
           <button
             onClick={() => setCategoryId("ALL")}
-            className={cn("rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs", categoryId === "ALL" && "border-[var(--color-primary)] text-[var(--color-primary)]")}
+            className={cn("rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs transition-colors hover:border-[var(--color-border-hover)]", categoryId === "ALL" && "border-[var(--color-primary)] text-[var(--color-primary)]")}
           >
             All Categories
           </button>
@@ -61,7 +61,7 @@ export function ToolBrowser({
             <button
               key={c.id}
               onClick={() => setCategoryId(c.id)}
-              className={cn("rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs", categoryId === c.id && "border-[var(--color-primary)] text-[var(--color-primary)]")}
+              className={cn("rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs transition-colors hover:border-[var(--color-border-hover)]", categoryId === c.id && "border-[var(--color-primary)] text-[var(--color-primary)]")}
             >
               {c.name}
             </button>
@@ -71,7 +71,7 @@ export function ToolBrowser({
             <button
               key={p}
               onClick={() => setPricing(p)}
-              className={cn("rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs capitalize", pricing === p && "border-[var(--color-primary)] text-[var(--color-primary)]")}
+              className={cn("rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs capitalize transition-colors hover:border-[var(--color-border-hover)]", pricing === p && "border-[var(--color-primary)] text-[var(--color-primary)]")}
             >
               {p.toLowerCase().replace("_", " ")}
             </button>

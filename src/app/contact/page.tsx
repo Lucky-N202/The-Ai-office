@@ -5,6 +5,16 @@ import { AdSlot } from "@/components/ad-slot";
 export const metadata: Metadata = {
   title: "Contact",
   description: "Get in touch with The AI Office team.",
+  openGraph: {
+    title: "Contact — The AI Office",
+    description: "Get in touch with The AI Office team.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Contact — The AI Office",
+    description: "Get in touch with The AI Office team.",
+  },
 };
 
 export default function ContactPage() {
