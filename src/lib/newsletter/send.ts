@@ -41,7 +41,7 @@ export async function sendArticleToSubscribers(article: {
     const results = await Promise.allSettled(
       batch.map((sub) =>
         resend!.emails.send({
-          from: "The AI Office <newsletter@the-ai-office.com>",
+          from: "The AI Office <theaioffice12@gmail.com>",
           to: sub.email,
           subject: article.title,
           text: `${article.title}\n\n${article.excerpt}\n\nRead the full article: ${articleUrl}\n\n---\nUnsubscribe: ${siteUrl}/api/newsletter/unsubscribe?token=${sub.unsubscribeToken}`,
