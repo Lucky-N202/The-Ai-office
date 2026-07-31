@@ -19,7 +19,7 @@ export async function notifyAdminOfPendingChange(params: {
 
   try {
     await resend.emails.send({
-      from: "The AI Office <notifications@the-ai-office.com>",
+      from: "The AI Office <theaioffice12@gmail.com>",
       to: process.env.ADMIN_NOTIFICATION_EMAIL,
       subject: `Review needed: ${params.toolName} (${params.changeType})`,
       text: `${params.toolName} — ${params.changeType}\n\n${params.summary}\n\nConfidence: ${Math.round(params.confidence * 100)}%\n\nReview: ${params.reviewUrl}`,
