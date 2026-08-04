@@ -107,10 +107,11 @@ export default async function AdvertisePage() {
                 </li>
               ))}
             </ul>
-            {/* Swap this mailto for a real Stripe Payment Link once you've created
-                one in your Stripe dashboard — zero backend changes needed, just
-                replace the href. E.g.:
-                href="https://buy.stripe.com/your-payment-link-here" */}
+            {/* This mailto is the intended first step, not a placeholder to
+                replace — a vendor reaches out here, you confirm it's really
+                their tool, then generate a tool-specific Paddle payment link
+                for them from /admin/tools. See the Paddle integration
+                section in README.md for the full flow. */}
             <a href={`mailto:hello@the-ai-office.com?subject=${encodeURIComponent(`${plan.name} placement — `)}`} className="mt-6">
               <Button className="w-full" variant={plan.highlight ? "primary" : "outline"}>
                 Get {plan.name}

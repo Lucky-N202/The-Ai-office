@@ -11,6 +11,36 @@ const BATCH_SIZE = 100;
 
 export type SendResult = { sent: number; failed: number; skipped: "not_configured" | null };
 
+export type WelcomeEmailResult = { sent: boolean; skipped: "not_configured" | null };
+
+/**
+ * Sends a one-time welcome/confirmation email right after a successful
+ * subscription — separate from sendArticleToSubscribers, which only fires
+ * when an admin publishes an article. Without this, subscribing has no
+ * confirmation at all beyond the on-page success message, which isn't
+ * enough on its own for someone to trust the email address they typed was
+ * actually received correctly.
+ */
+export async function sendWelcomeEmail(email: string, unsubscribeToken: string): Promise<WelcomeEmailResult> {
+  if (!resend) return { sent: false, skipped: "not_configured" };
+
+  const siteUrl = getSiteUrl();
+
+  try {
+    await resend.emails.send({
+      from: "The AI Office <newsletter@the-ai-office.com>",
+      to: email,
+      subject: "You're subscribed to The AI Office",
+      text: `Thanks for subscribing — you'll get a roundup whenever we publish something new about AI tools, roughly weekly.\n\nIn the meantime, browse the directory: ${siteUrl}/browse/tools/all\n\n---\nDidn't sign up for this? Unsubscribe here: ${siteUrl}/api/newsletter/unsubscribe?token=${unsubscribeToken}`,
+    });
+    return { sent: true, skipped: null };
+  } catch {
+    // Don't let a failed welcome email block the subscription itself from
+    // having succeeded — the subscriber row already exists at this point.
+    return { sent: false, skipped: null };
+  }
+}
+
 /**
  * Emails a published article to every active (non-unsubscribed) newsletter
  * subscriber. Always called explicitly from the admin "Publish & Send"
@@ -41,7 +71,7 @@ export async function sendArticleToSubscribers(article: {
     const results = await Promise.allSettled(
       batch.map((sub) =>
         resend!.emails.send({
-          from: "The AI Office <theaioffice12@gmail.com>",
+          from: "The AI Office <newsletter@the-ai-office.com>",
           to: sub.email,
           subject: article.title,
           text: `${article.title}\n\n${article.excerpt}\n\nRead the full article: ${articleUrl}\n\n---\nUnsubscribe: ${siteUrl}/api/newsletter/unsubscribe?token=${sub.unsubscribeToken}`,
