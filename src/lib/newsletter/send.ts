@@ -28,7 +28,7 @@ export async function sendWelcomeEmail(email: string, unsubscribeToken: string):
 
   try {
     await resend.emails.send({
-      from: "The AI Office <newsletter@the-ai-office.com>",
+      from: "The AI Office <theaioffice12@gmail.com>",
       to: email,
       subject: "You're subscribed to The AI Office",
       text: `Thanks for subscribing — you'll get a roundup whenever we publish something new about AI tools, roughly weekly.\n\nIn the meantime, browse the directory: ${siteUrl}/browse/tools/all\n\n---\nDidn't sign up for this? Unsubscribe here: ${siteUrl}/api/newsletter/unsubscribe?token=${unsubscribeToken}`,
@@ -71,7 +71,7 @@ export async function sendArticleToSubscribers(article: {
     const results = await Promise.allSettled(
       batch.map((sub) =>
         resend!.emails.send({
-          from: "The AI Office <newsletter@the-ai-office.com>",
+          from: "The AI Office <theaioffice12@gmail.com>",
           to: sub.email,
           subject: article.title,
           text: `${article.title}\n\n${article.excerpt}\n\nRead the full article: ${articleUrl}\n\n---\nUnsubscribe: ${siteUrl}/api/newsletter/unsubscribe?token=${sub.unsubscribeToken}`,
