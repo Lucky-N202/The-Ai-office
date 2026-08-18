@@ -24,6 +24,7 @@
     "@anthropic-ai/sdk": "^0.115.0",
     "@auth/prisma-adapter": "^2.7.4",
     "@paddle/paddle-node-sdk": "^3.8.0",
+    "@paddle/paddle-js": "^1.6.4",
     "@prisma/client": "^6.3.0",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.0",
