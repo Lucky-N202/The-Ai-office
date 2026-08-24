@@ -1,10 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
-import { Menu, Search, X } from "lucide-react";
+import { signOut } from "next-auth/react";
+import { Menu, Search, X, LogOut, User as UserIcon } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
+import type { Session } from "next-auth";
 
 const nav = [
   { href: "/browse/tools/all", label: "Browse" },
@@ -14,8 +17,9 @@ const nav = [
   { href: "/bookmarks", label: "Saved" },
 ];
 
-export function Header() {
+export function Header({ session }: { session: Session | null }) {
   const [open, setOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <header className="glass sticky top-0 z-40 w-full">
@@ -46,6 +50,49 @@ export function Header() {
           <Link href="/submit">
             <Button size="sm" className="hidden sm:inline-flex">Submit a Tool</Button>
           </Link>
+
+          {session?.user ? (
+            <div className="relative hidden sm:block">
+              <button
+                onClick={() => setMenuOpen((v) => !v)}
+                className="focus-ring flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-[var(--color-border)] hover:border-[var(--color-border-hover)]"
+                aria-label="Account menu"
+              >
+                {session.user.image ? (
+                  <Image src={session.user.image} alt={session.user.name ?? "Account"} width={36} height={36} className="h-full w-full object-cover" />
+                ) : (
+                  <UserIcon size={15} className="text-[var(--color-muted)]" />
+                )}
+              </button>
+              {menuOpen && (
+                <>
+                  <button className="fixed inset-0 z-40 cursor-default" onClick={() => setMenuOpen(false)} aria-hidden="true" tabIndex={-1} />
+                  <div className="glass absolute right-0 z-50 mt-2 w-48 rounded-[16px] p-1.5">
+                    <p className="truncate px-3 py-2 text-xs text-[var(--color-muted-2)]">{session.user.email}</p>
+                    <Link href="/welcome" onClick={() => setMenuOpen(false)} className="block rounded-[10px] px-3 py-2 text-sm text-[var(--color-muted)] hover:bg-white/[0.06] hover:text-[var(--color-foreground)]">
+                      Your dashboard
+                    </Link>
+                    {session.user.role === "ADMIN" && (
+                      <Link href="/admin" onClick={() => setMenuOpen(false)} className="block rounded-[10px] px-3 py-2 text-sm text-[var(--color-muted)] hover:bg-white/[0.06] hover:text-[var(--color-foreground)]">
+                        Admin dashboard
+                      </Link>
+                    )}
+                    <button
+                      onClick={() => signOut({ callbackUrl: "/" })}
+                      className="flex w-full items-center gap-2 rounded-[10px] px-3 py-2 text-left text-sm text-[var(--color-muted)] hover:bg-white/[0.06] hover:text-[var(--color-foreground)]"
+                    >
+                      <LogOut size={14} /> Sign out
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          ) : (
+            <Link href="/login" className="hidden sm:inline-flex">
+              <Button size="sm" variant="outline">Sign In</Button>
+            </Link>
+          )}
+
           <button className="focus-ring flex h-9 w-9 items-center justify-center rounded-full text-[var(--color-muted)] md:hidden" onClick={() => setOpen((v) => !v)} aria-label="Toggle menu">
             {open ? <X size={18} /> : <Menu size={18} />}
           </button>
@@ -59,6 +106,29 @@ export function Header() {
               {item.label}
             </Link>
           ))}
+          <div className="my-1 border-t border-[var(--color-border)]" />
+          {session?.user ? (
+            <>
+              <Link href="/welcome" className="rounded-lg px-3 py-2 text-sm text-[var(--color-muted)] hover:bg-white/[0.04]" onClick={() => setOpen(false)}>
+                Your dashboard
+              </Link>
+              {session.user.role === "ADMIN" && (
+                <Link href="/admin" className="rounded-lg px-3 py-2 text-sm text-[var(--color-muted)] hover:bg-white/[0.04]" onClick={() => setOpen(false)}>
+                  Admin dashboard
+                </Link>
+              )}
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-[var(--color-muted)] hover:bg-white/[0.04]"
+              >
+                <LogOut size={14} /> Sign out
+              </button>
+            </>
+          ) : (
+            <Link href="/login" className="rounded-lg px-3 py-2 text-sm text-[var(--color-muted)] hover:bg-white/[0.04]" onClick={() => setOpen(false)}>
+              Sign In
+            </Link>
+          )}
         </nav>
       )}
     </header>

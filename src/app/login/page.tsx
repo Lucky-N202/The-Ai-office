@@ -3,9 +3,18 @@ import { signIn, auth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Github } from "lucide-react";
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ callbackUrl?: string }>;
+}) {
+  const { callbackUrl } = await searchParams;
+  // Only ever redirect to a same-site path — never follow an external URL
+  // passed in callbackUrl, which would otherwise be an open-redirect risk.
+  const destination = callbackUrl?.startsWith("/") ? callbackUrl : "/welcome";
+
   const session = await auth();
-  if (session?.user) redirect("/");
+  if (session?.user) redirect(destination);
 
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-sm flex-col items-center justify-center px-4 text-center">
@@ -14,7 +23,7 @@ export default async function LoginPage() {
       <form
         action={async () => {
           "use server";
-          await signIn("github", { redirectTo: "/" });
+          await signIn("github", { redirectTo: destination });
         }}
       >
         <Button type="submit" size="lg" className="w-full">

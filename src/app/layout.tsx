@@ -8,6 +8,7 @@ import { CommandPalette } from "@/components/command-palette";
 import { Toaster } from "sonner";
 import { getSiteUrl } from "@/lib/site";
 import { AdSenseScript } from "@/components/adsense-script";
+import { auth } from "@/lib/auth";
 import { Analytics } from '@vercel/analytics/next';
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
@@ -42,13 +43,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const session = await auth();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans`}>
         <AdSenseScript />
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
-          <Header />
+          <Header session={session} />
           <CommandPalette />
           <main className="min-h-[70vh]">{children}</main>
           <Footer />

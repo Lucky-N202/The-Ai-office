@@ -6,7 +6,7 @@ const siteUrl = getSiteUrl();
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
-      { userAgent: "*", allow: "/", disallow: ["/admin", "/api", "/bookmarks", "/login"] },
+      { userAgent: "*", allow: "/", disallow: ["/admin", "/api", "/bookmarks", "/login", "/welcome"] },
       // Explicitly allow known AI crawlers/agents rather than relying on the
       // wildcard rule above — some crawlers specifically look for a named
       // entry rather than trusting "*", and being explicit here is what AI
