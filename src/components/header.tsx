@@ -3,11 +3,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { Menu, Search, X, LogOut, User as UserIcon } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
-import type { Session } from "next-auth";
 
 const nav = [
   { href: "/browse/tools/all", label: "Browse" },
@@ -17,7 +16,8 @@ const nav = [
   { href: "/bookmarks", label: "Saved" },
 ];
 
-export function Header({ session }: { session: Session | null }) {
+export function Header() {
+  const { data: session, status } = useSession();
   const [open, setOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -51,7 +51,9 @@ export function Header({ session }: { session: Session | null }) {
             <Button size="sm" className="hidden sm:inline-flex">Submit a Tool</Button>
           </Link>
 
-          {session?.user ? (
+          {status === "loading" ? (
+            <div className="hidden h-9 w-20 animate-pulse rounded-[14px] bg-white/[0.04] sm:block" />
+          ) : session?.user ? (
             <div className="relative hidden sm:block">
               <button
                 onClick={() => setMenuOpen((v) => !v)}

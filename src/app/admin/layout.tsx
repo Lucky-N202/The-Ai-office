@@ -16,8 +16,18 @@ const links = [
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
-  if (!session?.user || session.user.role !== "ADMIN") {
+
+  if (!session?.user) {
     redirect("/login?callbackUrl=/admin");
+  }
+  if (session.user.role !== "ADMIN") {
+    // Important distinction from the check above: this user IS logged in,
+    // just not an admin. Sending them back to /login here would create an
+    // infinite redirect loop — /login sees they're already authenticated and
+    // bounces them straight back to /admin, which bounces them back to
+    // /login, forever. Signing in again can never grant a role it doesn't
+    // have, so there's no reason to send them through the login flow again.
+    redirect("/welcome");
   }
 
   const [pendingSubmissions, pendingChanges, draftArticles] = await Promise.all([
