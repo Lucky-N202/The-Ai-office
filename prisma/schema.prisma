@@ -107,6 +107,17 @@ model Tool {
   pros          String[]
   cons          String[]
   tags          String[]
+  // Short, concrete "who this is for / what to use it for" bullets — shown
+  // on the tool page and folded into SEO keywords. Distinct from `features`
+  // (what the product does) vs. this (why/when someone would reach for it).
+  useCases      String[]     @default([])
+  // Curated competitor/alternative tools within the catalog. Implicit
+  // self-relation: connecting A -> B does not automatically connect B -> A,
+  // so the tool page displays the union of `alternatives` and
+  // `alternativeTo` to show the relationship regardless of which side it
+  // was set from.
+  alternatives  Tool[]       @relation("ToolAlternatives")
+  alternativeTo Tool[]       @relation("ToolAlternatives")
   rating        Float        @default(0)
   reviewCount   Int          @default(0)
   featured      Boolean      @default(false)

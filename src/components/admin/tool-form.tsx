@@ -16,7 +16,13 @@ function textToList(text: string) {
   return text.split("\n").map((s) => s.trim()).filter(Boolean);
 }
 
-export function ToolForm({ tool, categories }: { tool?: Tool; categories: Category[] }) {
+export function ToolForm({
+  tool,
+  categories,
+}: {
+  tool?: Tool & { alternatives?: { slug: string }[]; alternativeTo?: { slug: string }[] };
+  categories: Category[];
+}) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const isEdit = Boolean(tool);
@@ -40,6 +46,8 @@ export function ToolForm({ tool, categories }: { tool?: Tool; categories: Catego
       pros: textToList(form.get("pros") as string),
       cons: textToList(form.get("cons") as string),
       tags: textToList(form.get("tags") as string),
+      useCases: textToList(form.get("useCases") as string),
+      alternativeSlugs: textToList(form.get("alternativeSlugs") as string),
       featured: form.get("featured") === "on",
     };
 
@@ -112,6 +120,18 @@ export function ToolForm({ tool, categories }: { tool?: Tool; categories: Catego
         </Field>
         <Field label="Cons (one per line)">
           <textarea name="cons" defaultValue={tool ? listToText(tool.cons) : ""} rows={5} className="focus-ring w-full rounded-[14px] border border-[var(--color-border)] bg-white/[0.02] p-3.5 text-sm" />
+        </Field>
+        <Field label="Use Cases — what/who it's best for (one per line)">
+          <textarea name="useCases" defaultValue={tool ? listToText(tool.useCases) : ""} rows={5} className="focus-ring w-full rounded-[14px] border border-[var(--color-border)] bg-white/[0.02] p-3.5 text-sm" />
+        </Field>
+        <Field label="Alternatives — other tool slugs in this directory (one per line)">
+          <textarea
+            name="alternativeSlugs"
+            defaultValue={tool ? listToText([...new Set([...(tool.alternatives ?? []), ...(tool.alternativeTo ?? [])].map((t) => t.slug))]) : ""}
+            rows={5}
+            placeholder="e.g. chatgpt&#10;gemini"
+            className="focus-ring w-full rounded-[14px] border border-[var(--color-border)] bg-white/[0.02] p-3.5 text-sm"
+          />
         </Field>
       </div>
 

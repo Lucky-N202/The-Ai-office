@@ -18,7 +18,12 @@ export const revalidate = 3600;
 async function getTool(slug: string) {
   return prisma.tool.findUnique({
     where: { slug },
-    include: { category: true, reviews: { include: { user: true }, orderBy: { createdAt: "desc" }, take: 10 } },
+    include: {
+      category: true,
+      reviews: { include: { user: true }, orderBy: { createdAt: "desc" }, take: 10 },
+      alternatives: { include: { category: { select: { id: true, name: true, slug: true, color: true, icon: true } } } },
+      alternativeTo: { include: { category: { select: { id: true, name: true, slug: true, color: true, icon: true } } } },
+    },
   });
 }
 
@@ -35,7 +40,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: `${tool.name} — ${tool.tagline}`,
     description: tool.tagline,
-    keywords: [tool.name, tool.category.name, ...tool.tags],
+    keywords: [tool.name, tool.category.name, ...tool.tags, ...tool.useCases],
     alternates: { canonical: `${siteUrl}/browse/tools/${tool.slug}` },
     openGraph: {
       title: `${tool.name} — ${tool.tagline}`,
@@ -53,8 +58,13 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
   const tool = await getTool(slug);
   if (!tool) notFound();
 
+  // Merge both relation directions and dedupe — see schema comment on why
+  // there are two fields for what's conceptually one relationship.
+  const alternativesMap = new Map([...tool.alternatives, ...tool.alternativeTo].map((t) => [t.id, t]));
+  const alternatives = [...alternativesMap.values()];
+
   const related = await prisma.tool.findMany({
-    where: { categoryId: tool.categoryId, id: { not: tool.id } },
+    where: { categoryId: tool.categoryId, id: { notIn: [tool.id, ...alternatives.map((a) => a.id)] } },
     include: { category: { select: { id: true, name: true, slug: true, color: true, icon: true } } },
     take: 4,
   });
@@ -74,7 +84,7 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
           image: tool.logoUrl,
           datePublished: tool.createdAt.toISOString(),
           dateModified: tool.updatedAt.toISOString(),
-          keywords: tool.tags.join(", "),
+          keywords: [...tool.tags, ...tool.useCases].join(", "),
           featureList: tool.features,
           offers: {
             "@type": "Offer",
@@ -151,6 +161,19 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
             </ul>
           </section>
 
+          {tool.useCases.length > 0 && (
+            <section>
+              <h2 className="mb-3 text-lg font-semibold">Best For</h2>
+              <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {tool.useCases.map((u) => (
+                  <li key={u} className="flex items-start gap-2 text-sm text-[var(--color-muted)]">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-primary)]" /> {u}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
           <section className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div>
               <h3 className="mb-3 text-sm font-semibold text-[var(--color-muted)]">Pros</h3>
@@ -215,6 +238,15 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
           </div>
         </aside>
       </div>
+
+      {alternatives.length > 0 && (
+        <section className="mt-16">
+          <h2 className="mb-6 text-xl font-semibold">Popular alternatives to {tool.name}</h2>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {alternatives.map((t, i) => <ToolCard key={t.id} tool={t} index={i} />)}
+          </div>
+        </section>
+      )}
 
       {related.length > 0 && (
         <section className="mt-16">

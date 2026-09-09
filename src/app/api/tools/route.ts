@@ -39,6 +39,10 @@ const createToolSchema = z.object({
   pros: z.array(z.string()).default([]),
   cons: z.array(z.string()).default([]),
   tags: z.array(z.string()).default([]),
+  useCases: z.array(z.string()).default([]),
+  // Slugs of other tools in the catalog, resolved to a relation connect below
+  // — not a column on Tool itself.
+  alternativeSlugs: z.array(z.string()).default([]),
   featured: z.boolean().default(false),
 });
 
@@ -52,9 +56,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const slug = slugify(parsed.data.name);
+  const { alternativeSlugs, ...data } = parsed.data;
+  const slug = slugify(data.name);
   const tool = await prisma.tool.create({
-    data: { ...parsed.data, slug },
+    data: {
+      ...data,
+      slug,
+      ...(alternativeSlugs.length > 0 ? { alternatives: { connect: alternativeSlugs.map((s) => ({ slug: s })) } } : {}),
+    },
   });
 
   return NextResponse.json(tool, { status: 201 });

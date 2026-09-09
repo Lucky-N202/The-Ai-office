@@ -25,6 +25,8 @@ const updateToolSchema = z.object({
   pros: z.array(z.string()).optional(),
   cons: z.array(z.string()).optional(),
   tags: z.array(z.string()).optional(),
+  useCases: z.array(z.string()).optional(),
+  alternativeSlugs: z.array(z.string()).optional(),
   featured: z.boolean().optional(),
   verified: z.boolean().optional(),
 });
@@ -37,7 +39,18 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const parsed = updateToolSchema.safeParse(await req.json());
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
-  const tool = await prisma.tool.update({ where: { id }, data: parsed.data });
+  const { alternativeSlugs, ...data } = parsed.data;
+  const tool = await prisma.tool.update({
+    where: { id },
+    data: {
+      ...data,
+      // `set` replaces the full list from this tool's side each save —
+      // simplest mental model for an admin re-editing this field, at the
+      // cost of not touching links created from the *other* tool's side
+      // (rendered via `alternativeTo` on the tool page regardless).
+      ...(alternativeSlugs !== undefined ? { alternatives: { set: alternativeSlugs.map((s) => ({ slug: s })) } } : {}),
+    },
+  });
   return NextResponse.json(tool);
 }
 
