@@ -30,6 +30,9 @@ model User {
   email         String     @unique
   emailVerified DateTime?
   image         String?
+  // Null for users who only ever signed in via GitHub/Google OAuth.
+  // Set (bcrypt hash) for users who signed up with email/password.
+  password      String?
   role          Role       @default(USER)
   createdAt     DateTime   @default(now())
   bookmarks     Bookmark[]

@@ -2,33 +2,47 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
 import { signIn, auth } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Github, Chrome } from "lucide-react";
+import bcrypt from "bcryptjs";
 
-export default async function LoginPage({
+export default async function SignupPage({
   searchParams,
 }: {
   searchParams: Promise<{ callbackUrl?: string; error?: string }>;
 }) {
   const { callbackUrl, error } = await searchParams;
-  // Only ever redirect to a same-site path — never follow an external URL
-  // passed in callbackUrl, which would otherwise be an open-redirect risk.
   const destination = callbackUrl?.startsWith("/") ? callbackUrl : "/welcome";
 
   const session = await auth();
   if (session?.user) redirect(destination);
 
-  async function loginWithPassword(formData: FormData) {
+  async function signup(formData: FormData) {
     "use server";
+    const name = formData.get("name") as string;
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
+    if (!name || !email || !password || password.length < 8) {
+      redirect(`/signup?error=InvalidInput`);
+    }
+
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      redirect(`/signup?error=EmailInUse`);
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+    await prisma.user.create({ data: { name, email, password: hashedPassword } });
+
+    // Auto-login right after signup so there's no extra step.
     try {
       await signIn("credentials", { email, password, redirectTo: destination });
     } catch (err) {
       if (err instanceof AuthError) {
-        redirect(`/login?error=CredentialsSignin&callbackUrl=${encodeURIComponent(destination)}`);
+        redirect("/login");
       }
       throw err;
     }
@@ -36,8 +50,8 @@ export default async function LoginPage({
 
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-sm flex-col items-center justify-center px-4 text-center">
-      <h1 className="mb-2 text-2xl font-bold tracking-tight">Sign in</h1>
-      <p className="mb-8 text-sm text-[var(--color-muted)]">Sign in to bookmark tools across devices and leave reviews.</p>
+      <h1 className="mb-2 text-2xl font-bold tracking-tight">Create an account</h1>
+      <p className="mb-8 text-sm text-[var(--color-muted)]">Sign up to bookmark tools across devices and leave reviews.</p>
 
       <div className="flex w-full flex-col gap-3">
         <form
@@ -69,21 +83,25 @@ export default async function LoginPage({
         <div className="h-px flex-1 bg-[var(--color-border)]" />
       </div>
 
-      <form action={loginWithPassword} className="flex w-full flex-col gap-3 text-left">
+      <form action={signup} className="flex w-full flex-col gap-3 text-left">
+        <Input type="text" name="name" placeholder="Name" required />
         <Input type="email" name="email" placeholder="Email" required />
-        <Input type="password" name="password" placeholder="Password" required />
-        {error === "CredentialsSignin" && (
-          <p className="text-sm text-red-500">Invalid email or password.</p>
+        <Input type="password" name="password" placeholder="Password (min. 8 characters)" minLength={8} required />
+        {error === "EmailInUse" && (
+          <p className="text-sm text-red-500">An account with this email already exists.</p>
+        )}
+        {error === "InvalidInput" && (
+          <p className="text-sm text-red-500">Please fill in every field (password: 8+ characters).</p>
         )}
         <Button type="submit" size="lg" className="w-full">
-          Log in
+          Sign up
         </Button>
       </form>
 
       <p className="mt-6 text-sm text-[var(--color-muted)]">
-        Don&apos;t have an account?{" "}
-        <Link href="/signup" className="text-[var(--color-primary)] hover:underline">
-          Sign up
+        Already have an account?{" "}
+        <Link href="/login" className="text-[var(--color-primary)] hover:underline">
+          Log in
         </Link>
       </p>
     </div>
