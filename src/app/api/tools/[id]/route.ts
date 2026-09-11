@@ -1,64 +1,73 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { slugify } from "@/lib/utils";
 import { requireAdmin } from "@/lib/auth";
+import { pingIndexNow } from "@/lib/indexnow";
 
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const tool = await prisma.tool.findUnique({ where: { id }, include: { category: true } });
-  if (!tool) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json(tool);
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const limit = Math.min(Number(searchParams.get("limit") ?? 50), 500);
+  const categoryId = searchParams.get("categoryId") ?? undefined;
+  const idsParam = searchParams.get("ids");
+  const ids = idsParam ? idsParam.split(",").filter(Boolean) : undefined;
+
+  const tools = await prisma.tool.findMany({
+    where: {
+      ...(categoryId ? { categoryId } : {}),
+      ...(ids ? { id: { in: ids } } : {}),
+    },
+    include: { category: { select: { id: true, name: true, slug: true, color: true, icon: true } } },
+    orderBy: { rating: "desc" },
+    take: limit,
+  });
+
+  return NextResponse.json(tools);
 }
 
-const updateToolSchema = z.object({
-  name: z.string().min(1).optional(),
-  tagline: z.string().min(1).optional(),
-  description: z.string().min(1).optional(),
-  websiteUrl: z.string().url().optional(),
+const createToolSchema = z.object({
+  name: z.string().min(1),
+  tagline: z.string().min(1),
+  description: z.string().min(1),
+  websiteUrl: z.string().url(),
   affiliateUrl: z.string().url().nullable().optional(),
   docsUrl: z.string().url().nullable().optional(),
-  logoUrl: z.string().url().optional(),
-  categoryId: z.string().min(1).optional(),
-  pricingModel: z.enum(["FREE", "FREEMIUM", "PAID", "ENTERPRISE", "OPEN_SOURCE"]).optional(),
+  logoUrl: z.string().url(),
+  categoryId: z.string().min(1),
+  pricingModel: z.enum(["FREE", "FREEMIUM", "PAID", "ENTERPRISE", "OPEN_SOURCE"]).default("FREEMIUM"),
   startingPrice: z.number().nullable().optional(),
-  features: z.array(z.string()).optional(),
-  pros: z.array(z.string()).optional(),
-  cons: z.array(z.string()).optional(),
-  tags: z.array(z.string()).optional(),
-  useCases: z.array(z.string()).optional(),
-  alternativeSlugs: z.array(z.string()).optional(),
-  featured: z.boolean().optional(),
-  verified: z.boolean().optional(),
+  features: z.array(z.string()).default([]),
+  pros: z.array(z.string()).default([]),
+  cons: z.array(z.string()).default([]),
+  tags: z.array(z.string()).default([]),
+  useCases: z.array(z.string()).default([]),
+  // Slugs of other tools in the catalog, resolved to a relation connect below
+  // — not a column on Tool itself.
+  alternativeSlugs: z.array(z.string()).default([]),
+  featured: z.boolean().default(false),
 });
 
-export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(req: NextRequest) {
   const admin = await requireAdmin();
   if (!admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  const { id } = await params;
-  const parsed = updateToolSchema.safeParse(await req.json());
-  if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+  const body = await req.json();
+  const parsed = createToolSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+  }
 
   const { alternativeSlugs, ...data } = parsed.data;
-  const tool = await prisma.tool.update({
-    where: { id },
+  const slug = slugify(data.name);
+  const tool = await prisma.tool.create({
     data: {
       ...data,
-      // `set` replaces the full list from this tool's side each save —
-      // simplest mental model for an admin re-editing this field, at the
-      // cost of not touching links created from the *other* tool's side
-      // (rendered via `alternativeTo` on the tool page regardless).
-      ...(alternativeSlugs !== undefined ? { alternatives: { set: alternativeSlugs.map((s) => ({ slug: s })) } } : {}),
+      slug,
+      ...(alternativeSlugs.length > 0 ? { alternatives: { connect: alternativeSlugs.map((s) => ({ slug: s })) } } : {}),
     },
   });
-  return NextResponse.json(tool);
-}
 
-export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const admin = await requireAdmin();
-  if (!admin) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  void pingIndexNow([`/browse/tools/${tool.slug}`]);
 
-  const { id } = await params;
-  await prisma.tool.delete({ where: { id } });
-  return NextResponse.json({ success: true });
+  return NextResponse.json(tool, { status: 201 });
 }

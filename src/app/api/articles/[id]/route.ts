@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { sendArticleToSubscribers } from "@/lib/newsletter/send";
+import { pingIndexNow } from "@/lib/indexnow";
 
 const updateArticleSchema = z.object({
   title: z.string().min(1).max(140).optional(),
@@ -41,6 +42,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     revalidatePath("/blog");
     revalidatePath(`/blog/${article.slug}`);
     revalidatePath("/sitemap.xml");
+    void pingIndexNow(["/blog", `/blog/${article.slug}`]);
 
     const sendResult = await sendArticleToSubscribers(article);
 
@@ -53,6 +55,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const article = await prisma.article.update({ where: { id }, data: parsed.data });
   if (article.status === "PUBLISHED") {
     revalidatePath(`/blog/${article.slug}`);
+    void pingIndexNow([`/blog/${article.slug}`]);
   }
   return NextResponse.json(article);
 }
