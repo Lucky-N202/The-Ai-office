@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SubmitForm } from "@/components/submit-form";
+import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
   title: "Submit a Tool",
@@ -16,7 +17,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function SubmitPage() {
+export default async function SubmitPage() {
+  const categories = await prisma.category.findMany({
+    select: { id: true, name: true },
+    orderBy: { name: "asc" },
+  });
+
   return (
     <div className="mx-auto max-w-lg px-4 py-16 sm:px-6 lg:px-8">
       <h1 className="mb-2 text-2xl font-bold tracking-tight sm:text-3xl">Submit a Tool</h1>
@@ -24,7 +30,7 @@ export default function SubmitPage() {
         Know an AI tool that deserves a spot in the directory? Tell us about it — our team reviews every
         submission before it goes live.
       </p>
-      <SubmitForm />
+      <SubmitForm categories={categories} />
     </div>
   );
 }

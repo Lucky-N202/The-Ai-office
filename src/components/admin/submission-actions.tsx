@@ -6,9 +6,17 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import type { Category } from "@prisma/client";
 
-export function SubmissionActions({ submissionId, categories }: { submissionId: string; categories: Category[] }) {
+export function SubmissionActions({
+  submissionId,
+  categories,
+  defaultCategoryId,
+}: {
+  submissionId: string;
+  categories: Category[];
+  defaultCategoryId?: string | null;
+}) {
   const router = useRouter();
-  const [categoryId, setCategoryId] = useState(categories[0]?.id ?? "");
+  const [categoryId, setCategoryId] = useState(defaultCategoryId ?? categories[0]?.id ?? "");
   const [loading, setLoading] = useState<"approve" | "reject" | null>(null);
 
   async function decide(action: "approve" | "reject") {

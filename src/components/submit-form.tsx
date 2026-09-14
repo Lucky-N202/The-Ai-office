@@ -5,7 +5,7 @@ import { CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-export function SubmitForm() {
+export function SubmitForm({ categories }: { categories: { id: string; name: string }[] }) {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
 
@@ -19,6 +19,8 @@ export function SubmitForm() {
       tagline: form.get("tagline") as string,
       description: form.get("description") as string,
       websiteUrl: form.get("websiteUrl") as string,
+      logoUrl: form.get("logoUrl") as string,
+      categoryId: form.get("categoryId") as string,
       submitterEmail: form.get("submitterEmail") as string,
       company: form.get("company") as string, // honeypot, left empty by real users
     };
@@ -60,6 +62,22 @@ export function SubmitForm() {
         <textarea name="description" required maxLength={2000} rows={4} className="focus-ring w-full rounded-[14px] border border-[var(--color-border)] bg-white/[0.02] p-3.5 text-sm" />
       </Field>
       <Field label="Website URL"><Input name="websiteUrl" type="url" required placeholder="https://" /></Field>
+      <Field label="Logo URL">
+        <Input name="logoUrl" type="url" required placeholder="https://.../logo.png" />
+      </Field>
+      <Field label="Category">
+        <select
+          name="categoryId"
+          required
+          defaultValue=""
+          className="focus-ring w-full rounded-[14px] border border-[var(--color-border)] bg-white/[0.02] p-3.5 text-sm"
+        >
+          <option value="" disabled>Select a category</option>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>{c.name}</option>
+          ))}
+        </select>
+      </Field>
       <Field label="Your email"><Input name="submitterEmail" type="email" required placeholder="So we can follow up if needed" /></Field>
 
       {/* Honeypot — hidden from real users via CSS, bots that auto-fill every field will trip it. */}

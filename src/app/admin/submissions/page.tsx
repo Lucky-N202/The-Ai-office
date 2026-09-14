@@ -23,9 +23,15 @@ export default async function AdminSubmissionsPage() {
           {submissions.map((s) => (
             <div key={s.id} className="card-surface p-5">
               <div className="mb-3 flex items-start justify-between gap-4">
-                <div>
-                  <p className="font-semibold">{s.name}</p>
-                  <p className="text-sm text-[var(--color-muted)]">{s.tagline}</p>
+                <div className="flex items-start gap-3">
+                  {s.logoUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element -- admin-only review list, arbitrary external submitter URLs
+                    <img src={s.logoUrl} alt="" className="h-10 w-10 shrink-0 rounded-lg object-contain" />
+                  )}
+                  <div>
+                    <p className="font-semibold">{s.name}</p>
+                    <p className="text-sm text-[var(--color-muted)]">{s.tagline}</p>
+                  </div>
                 </div>
                 <a href={s.websiteUrl} target="_blank" rel="noopener noreferrer" className="shrink-0 text-xs text-[var(--color-primary)]">
                   {s.websiteUrl}
@@ -33,7 +39,7 @@ export default async function AdminSubmissionsPage() {
               </div>
               <p className="mb-4 text-sm text-[var(--color-muted)]">{s.description}</p>
               <p className="mb-4 text-xs text-[var(--color-muted-2)]">Submitted by {s.submitterEmail} · {s.createdAt.toLocaleDateString()}</p>
-              <SubmissionActions submissionId={s.id} categories={categories} />
+              <SubmissionActions submissionId={s.id} categories={categories} defaultCategoryId={s.categoryId} />
             </div>
           ))}
         </div>

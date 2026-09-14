@@ -33,7 +33,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       tagline: submission.tagline,
       description: submission.description,
       websiteUrl: submission.websiteUrl,
-      logoUrl: `https://www.google.com/s2/favicons?domain=${new URL(submission.websiteUrl).hostname}&sz=128`,
+      // Prefer the logo the submitter actually gave us; fall back to a
+      // favicon scrape only for submissions made before this field existed.
+      logoUrl: submission.logoUrl ?? `https://www.google.com/s2/favicons?domain=${new URL(submission.websiteUrl).hostname}&sz=128`,
       categoryId: parsed.data.categoryId,
       verified: false,
       featured: false,

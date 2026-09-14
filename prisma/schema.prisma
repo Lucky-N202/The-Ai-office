@@ -77,6 +77,7 @@ model Category {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   tools       Tool[]
+  submissions ToolSubmission[]
 }
 
 model Tool {
@@ -244,6 +245,12 @@ model ToolSubmission {
   tagline        String
   description    String           @db.Text
   websiteUrl     String
+  // Nullable at the DB level so existing rows (submitted before this field
+  // existed) don't break `prisma db push` — required for new submissions via
+  // the Zod schema in the API route instead.
+  logoUrl        String?
+  categoryId     String?
+  category       Category?        @relation(fields: [categoryId], references: [id])
   submitterEmail String
   status         SubmissionStatus @default(PENDING)
   createdAt      DateTime         @default(now())

@@ -9,6 +9,8 @@ const submissionSchema = z.object({
   tagline: z.string().min(1).max(140),
   description: z.string().min(1).max(2000),
   websiteUrl: z.string().url(),
+  logoUrl: z.string().url(),
+  categoryId: z.string().min(1),
   submitterEmail: z.string().email(),
   // Honeypot field: real users never fill this in. Bots that blindly fill every
   // input usually will, letting us silently drop the submission without a CAPTCHA.
@@ -34,6 +36,12 @@ export async function POST(req: NextRequest) {
   if (parsed.data.company) return NextResponse.json({ success: true }, { status: 201 });
 
   const { company: _company, ...data } = parsed.data;
+
+  const category = await prisma.category.findUnique({ where: { id: data.categoryId } });
+  if (!category) {
+    return NextResponse.json({ error: "Invalid category selected" }, { status: 400 });
+  }
+
   const submission = await prisma.toolSubmission.create({ data });
   return NextResponse.json(submission, { status: 201 });
 }
