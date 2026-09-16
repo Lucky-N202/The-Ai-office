@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Check, Star, ShieldCheck, TrendingUp } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
+import { CopyEmailButton } from "@/components/copy-email-button";
 
 export const metadata: Metadata = {
   title: "Advertise Your AI Tool",
@@ -112,7 +113,14 @@ export default async function AdvertisePage() {
                 their tool, then generate a tool-specific Paddle payment link
                 for them from /admin/tools. See the Paddle integration
                 section in README.md for the full flow. */}
-            <a href={`mailto:hello@the-ai-office.com?subject=${encodeURIComponent(`${plan.name} placement — `)}`} className="mt-6">
+            <a
+              href={`mailto:hello@the-ai-office.com?subject=${encodeURIComponent(
+                `${plan.name} placement — `
+              )}&body=${encodeURIComponent(
+                `Hi,\n\nI'd like to sign up for the ${plan.name} plan.\n\nTool name: \nWebsite URL: \n\nAnything else we should know:\n`
+              )}`}
+              className="mt-6"
+            >
               <Button className="w-full" variant={plan.highlight ? "primary" : "outline"}>
                 Get {plan.name}
               </Button>
@@ -121,7 +129,11 @@ export default async function AdvertisePage() {
         ))}
       </div>
 
-      <p className="mt-12 text-center text-sm text-[var(--color-muted)]">
+      <p className="mt-6 text-center text-sm text-[var(--color-muted-2)]">
+        Email link not opening? Copy it instead: <CopyEmailButton email="hello@the-ai-office.com" />
+      </p>
+
+      <p className="mt-6 text-center text-sm text-[var(--color-muted)]">
         Already listed and want to upgrade? Or have a custom request?{" "}
         <a href="mailto:hello@the-ai-office.com" className="text-[var(--color-primary)]">Email us</a> — happy to
         talk specifics.
