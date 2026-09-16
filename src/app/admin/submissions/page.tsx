@@ -3,7 +3,7 @@ import { SubmissionActions } from "@/components/admin/submission-actions";
 
 export default async function AdminSubmissionsPage() {
   const [submissions, categories] = await Promise.all([
-    prisma.toolSubmission.findMany({ where: { status: "PENDING" }, orderBy: { createdAt: "desc" } }),
+    prisma.toolSubmission.findMany({ where: { status: "PENDING" }, orderBy: [{ priorityReview: "desc" }, { createdAt: "desc" }] }),
     prisma.category.findMany({ orderBy: { name: "asc" } }),
   ]);
 
@@ -29,7 +29,14 @@ export default async function AdminSubmissionsPage() {
                     <img src={s.logoUrl} alt="" className="h-10 w-10 shrink-0 rounded-lg object-contain" />
                   )}
                   <div>
-                    <p className="font-semibold">{s.name}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold">{s.name}</p>
+                      {s.priorityReview && (
+                        <span className="rounded-full bg-[var(--color-primary-muted)] px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-[var(--color-primary)]">
+                          Priority
+                        </span>
+                      )}
+                    </div>
                     <p className="text-sm text-[var(--color-muted)]">{s.tagline}</p>
                   </div>
                 </div>
@@ -39,7 +46,12 @@ export default async function AdminSubmissionsPage() {
               </div>
               <p className="mb-4 text-sm text-[var(--color-muted)]">{s.description}</p>
               <p className="mb-4 text-xs text-[var(--color-muted-2)]">Submitted by {s.submitterEmail} · {s.createdAt.toLocaleDateString()}</p>
-              <SubmissionActions submissionId={s.id} categories={categories} defaultCategoryId={s.categoryId} />
+              <SubmissionActions
+                submissionId={s.id}
+                categories={categories}
+                defaultCategoryId={s.categoryId}
+                priorityReview={s.priorityReview}
+              />
             </div>
           ))}
         </div>

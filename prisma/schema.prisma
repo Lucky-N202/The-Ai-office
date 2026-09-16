@@ -253,6 +253,11 @@ model ToolSubmission {
   category       Category?        @relation(fields: [categoryId], references: [id])
   submitterEmail String
   status         SubmissionStatus @default(PENDING)
+  // Set by an admin after confirming a paid "Verified" plan submission (see
+  // /advertise) — moves it to the top of the review queue. Not
+  // self-service: a submitter can't set this themselves at submit time,
+  // since it's tied to a payment an admin has to confirm manually first.
+  priorityReview Boolean          @default(false)
   createdAt      DateTime         @default(now())
   reviewedAt     DateTime?
 

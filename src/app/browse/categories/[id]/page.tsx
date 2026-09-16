@@ -17,7 +17,10 @@ async function getCategory(id: string) {
     include: {
       tools: {
         include: { category: { select: { id: true, name: true, slug: true, color: true, icon: true } } },
-        orderBy: { rating: "desc" },
+        // Featured first (this is the actual mechanism behind the paid
+        // "Featured" plan's promised category-page boost — see /advertise),
+        // then by rating within each group.
+        orderBy: [{ featured: "desc" }, { rating: "desc" }],
       },
     },
   });

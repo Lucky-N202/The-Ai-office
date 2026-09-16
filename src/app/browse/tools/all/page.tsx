@@ -28,7 +28,7 @@ export default async function AllToolsPage({
   const [tools, categories] = await Promise.all([
     prisma.tool.findMany({
       include: { category: { select: { id: true, name: true, slug: true, color: true, icon: true } } },
-      orderBy: { rating: "desc" },
+      orderBy: [{ featured: "desc" }, { rating: "desc" }],
     }),
     prisma.category.findMany({ orderBy: { name: "asc" } }),
   ]);

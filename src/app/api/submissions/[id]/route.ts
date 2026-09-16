@@ -7,6 +7,7 @@ import { slugify } from "@/lib/utils";
 const decisionSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("reject") }),
   z.object({ action: z.literal("approve"), categoryId: z.string().min(1) }),
+  z.object({ action: z.literal("toggle-priority") }),
 ]);
 
 /** Admin — approve (creates a real Tool) or reject a pending submission. */
@@ -24,6 +25,14 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (parsed.data.action === "reject") {
     await prisma.toolSubmission.update({ where: { id }, data: { status: "REJECTED", reviewedAt: new Date() } });
     return NextResponse.json({ success: true });
+  }
+
+  if (parsed.data.action === "toggle-priority") {
+    const updated = await prisma.toolSubmission.update({
+      where: { id },
+      data: { priorityReview: !submission.priorityReview },
+    });
+    return NextResponse.json(updated);
   }
 
   const tool = await prisma.tool.create({
