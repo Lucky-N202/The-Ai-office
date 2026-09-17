@@ -27,8 +27,17 @@ async function getCategory(id: string) {
 }
 
 export async function generateStaticParams() {
-  const categories = await prisma.category.findMany({ select: { id: true } });
-  return categories.map((c) => ({ id: c.id }));
+  try {
+    const categories = await prisma.category.findMany({ select: { id: true } });
+    return categories.map((c) => ({ id: c.id }));
+  } catch (err) {
+    // If the DB is briefly unreachable at build time (e.g. a Neon cold-start
+    // or connection-pool blip), don't fail the entire deployment over it —
+    // return no pre-built paths and let each page render on-demand instead,
+    // where it's then cached per the `revalidate` setting above like normal.
+    console.error("generateStaticParams: failed to fetch categories, falling back to on-demand rendering", err);
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {

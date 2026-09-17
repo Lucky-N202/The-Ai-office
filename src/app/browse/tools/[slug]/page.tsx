@@ -28,8 +28,13 @@ async function getTool(slug: string) {
 }
 
 export async function generateStaticParams() {
-  const tools = await prisma.tool.findMany({ select: { slug: true } });
-  return tools.map((t) => ({ slug: t.slug }));
+  try {
+    const tools = await prisma.tool.findMany({ select: { slug: true } });
+    return tools.map((t) => ({ slug: t.slug }));
+  } catch (err) {
+    console.error("generateStaticParams: failed to fetch tools, falling back to on-demand rendering", err);
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
