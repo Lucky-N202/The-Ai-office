@@ -10,6 +10,9 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "www.google.com" },
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "**.githubusercontent.com" },
+      // Serves the LobeHub AI-brand icon set used for tool logos — see
+      // prisma/upgrade-tool-logos.ts
+      { protocol: "https", hostname: "unpkg.com" },
     ],
     formats: ["image/avif", "image/webp"],
   },
