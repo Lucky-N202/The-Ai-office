@@ -13,6 +13,8 @@ const nextConfig: NextConfig = {
       // Serves the LobeHub AI-brand icon set used for tool logos — see
       // prisma/upgrade-tool-logos.ts
       { protocol: "https", hostname: "unpkg.com" },
+      // Doc Translator's own hosted logo
+      { protocol: "https", hostname: "www.doctranslator.io" },
     ],
     formats: ["image/avif", "image/webp"],
   },
