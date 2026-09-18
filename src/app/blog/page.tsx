@@ -55,7 +55,7 @@ export default async function BlogPage() {
             >
               {article.coverImage && (
                 <div className="relative hidden w-48 shrink-0 sm:block">
-                  <Image src={article.coverImage} alt="" fill className="object-cover" sizes="192px" />
+                  <Image src={article.coverImage} alt="" fill className="object-cover object-left" sizes="192px" />
                 </div>
               )}
               <div className="flex-1 py-6 pr-6 pl-5 sm:pl-0">
