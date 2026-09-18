@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { Badge } from "@/components/ui/badge";
@@ -47,13 +48,24 @@ export default async function BlogPage() {
       ) : (
         <div className="space-y-6">
           {articles.map((article) => (
-            <Link key={article.id} href={`/blog/${article.slug}`} className="card-surface card-interactive block p-6">
-              <div className="mb-2 flex items-center gap-2 text-xs text-[var(--color-muted-2)]">
-                <span>{article.publishedAt?.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</span>
-                {article.aiGenerated && <Badge>AI-assisted</Badge>}
+            <Link
+              key={article.id}
+              href={`/blog/${article.slug}`}
+              className="card-surface card-interactive flex items-stretch gap-5 overflow-hidden p-0 sm:gap-6"
+            >
+              {article.coverImage && (
+                <div className="relative hidden w-48 shrink-0 sm:block">
+                  <Image src={article.coverImage} alt="" fill className="object-cover" sizes="192px" />
+                </div>
+              )}
+              <div className="flex-1 py-6 pr-6 pl-5 sm:pl-0">
+                <div className="mb-2 flex items-center gap-2 text-xs text-[var(--color-muted-2)]">
+                  <span>{article.publishedAt?.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</span>
+                  {article.aiGenerated && <Badge>AI-assisted</Badge>}
+                </div>
+                <h2 className="mb-2 text-xl font-semibold">{article.title}</h2>
+                <p className="text-sm text-[var(--color-muted)]">{article.excerpt}</p>
               </div>
-              <h2 className="mb-2 text-xl font-semibold">{article.title}</h2>
-              <p className="text-sm text-[var(--color-muted)]">{article.excerpt}</p>
             </Link>
           ))}
         </div>

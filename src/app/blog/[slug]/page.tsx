@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/prisma";
@@ -32,6 +33,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!article) return {};
 
   const siteUrl = getSiteUrl();
+  const imageUrl = article.coverImage
+    ? article.coverImage.startsWith("http") ? article.coverImage : `${siteUrl}${article.coverImage}`
+    : undefined;
+
   return {
     title: article.title,
     description: article.excerpt,
@@ -42,8 +47,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       description: article.excerpt,
       url: `${siteUrl}/blog/${article.slug}`,
       publishedTime: article.publishedAt?.toISOString(),
+      images: imageUrl ? [{ url: imageUrl, width: 1200, height: 630 }] : undefined,
     },
-    twitter: { card: "summary_large_image", title: article.title, description: article.excerpt },
+    twitter: {
+      card: "summary_large_image",
+      title: article.title,
+      description: article.excerpt,
+      images: imageUrl ? [imageUrl] : undefined,
+    },
   };
 }
 
@@ -72,6 +83,12 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
       <Link href="/blog" className="mb-6 inline-flex items-center gap-1.5 text-sm text-[var(--color-muted)] hover:text-[var(--color-foreground)]">
         <ArrowLeft size={14} /> Back to blog
       </Link>
+
+      {article.coverImage && (
+        <div className="relative mb-8 aspect-[1200/630] w-full overflow-hidden rounded-2xl">
+          <Image src={article.coverImage} alt="" fill priority className="object-cover" sizes="(max-width: 768px) 100vw, 768px" />
+        </div>
+      )}
 
       <div className="mb-4 flex items-center gap-2 text-xs text-[var(--color-muted-2)]">
         <span>{article.publishedAt?.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</span>
