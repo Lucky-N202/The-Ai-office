@@ -13,6 +13,7 @@ export function ArticleForm({ article }: { article?: Article }) {
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [content, setContent] = useState(article?.content ?? "");
+  const [coverImage, setCoverImage] = useState(article?.coverImage ?? "");
   const [showPreview, setShowPreview] = useState(false);
   const isEdit = Boolean(article);
 
@@ -24,7 +25,7 @@ export function ArticleForm({ article }: { article?: Article }) {
       title: form.get("title") as string,
       excerpt: form.get("excerpt") as string,
       content,
-      coverImage: (form.get("coverImage") as string) || null,
+      coverImage: coverImage || null,
     };
 
     const res = await fetch(isEdit ? `/api/articles/${article!.id}` : "/api/articles", {
@@ -89,7 +90,29 @@ export function ArticleForm({ article }: { article?: Article }) {
         </label>
         <label className="block">
           <span className="mb-1.5 block text-xs font-medium text-[var(--color-muted)]">Cover image URL (optional)</span>
-          <Input name="coverImage" type="url" defaultValue={article?.coverImage ?? ""} />
+          <Input
+            name="coverImage"
+            type="text"
+            value={coverImage}
+            onChange={(e) => setCoverImage(e.target.value)}
+            placeholder="/blog-covers/your-image.png or a full https:// URL"
+          />
+          {coverImage ? (
+            // eslint-disable-next-line @next/next/no-img-element -- admin-only live preview of an arbitrary/relative URL being typed, not a final rendered page
+            <img
+              src={coverImage}
+              alt=""
+              className="mt-2 h-32 w-full rounded-xl border border-[var(--color-border)] object-cover object-left"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = "none";
+              }}
+              onLoad={(e) => {
+                (e.target as HTMLImageElement).style.display = "block";
+              }}
+            />
+          ) : (
+            <p className="mt-2 text-xs text-[var(--color-muted-2)]">No cover image set — this article will use the blog's default look with no thumbnail.</p>
+          )}
         </label>
         <div>
           <div className="mb-1.5 flex items-center justify-between">

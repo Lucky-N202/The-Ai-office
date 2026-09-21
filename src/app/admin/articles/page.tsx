@@ -26,6 +26,7 @@ export default async function AdminArticlesPage() {
           <table className="w-full min-w-[560px] text-sm">
             <thead>
               <tr className="border-b border-[var(--color-border)] text-left text-[var(--color-muted-2)]">
+                <th className="p-4">Cover</th>
                 <th className="p-4">Title</th>
                 <th className="p-4">Status</th>
                 <th className="p-4">Source</th>
@@ -35,6 +36,16 @@ export default async function AdminArticlesPage() {
             <tbody>
               {articles.map((article) => (
                 <tr key={article.id} className="border-b border-[var(--color-border)] last:border-0">
+                  <td className="p-4">
+                    <Link href={`/admin/articles/${article.id}`}>
+                      {article.coverImage ? (
+                        // eslint-disable-next-line @next/next/no-img-element -- small admin-only thumbnail, arbitrary relative/external URLs
+                        <img src={article.coverImage} alt="" className="h-10 w-16 rounded-md border border-[var(--color-border)] object-cover object-left" />
+                      ) : (
+                        <div className="h-10 w-16 rounded-md border border-dashed border-[var(--color-border)]" />
+                      )}
+                    </Link>
+                  </td>
                   <td className="p-4">
                     <Link href={`/admin/articles/${article.id}`} className="hover:text-[var(--color-primary)]">
                       {article.title}
