@@ -26,6 +26,10 @@ export async function GET(req: NextRequest) {
       content: digest.content,
       status: "DRAFT",
       aiGenerated: true,
+      // Generic branded fallback so digest posts are never bare in the blog
+      // list or social share previews — swap for something custom in
+      // /admin/articles before publishing if you want a specific image.
+      coverImage: "/blog-covers/weekly-roundup-default.png",
     },
   });
 
