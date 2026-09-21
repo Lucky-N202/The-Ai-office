@@ -62,7 +62,9 @@ export async function generateComparisonPost(): Promise<ComparisonResult> {
   // Pick one at random rather than always the first, so re-running this
   // near-simultaneously (or across months) doesn't keep proposing the same
   // pairing if an admin hasn't gotten to reviewing the last draft yet.
-  const { a: toolA, b: toolBSummary } = candidates[Math.floor(Math.random() * candidates.length)];
+const picked = candidates[Math.floor(Math.random() * candidates.length)];
+if (!picked) return null;
+const { a: toolA, b: toolBSummary } = picked;
   const toolB = await prisma.tool.findUnique({
     where: { id: toolBSummary.id },
     include: { category: { select: { name: true } } },
