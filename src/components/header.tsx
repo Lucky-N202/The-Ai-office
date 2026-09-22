@@ -74,6 +74,9 @@ export function Header() {
                     <Link href="/welcome" onClick={() => setMenuOpen(false)} className="block rounded-[10px] px-3 py-2 text-sm text-[var(--color-muted)] hover:bg-white/[0.06] hover:text-[var(--color-foreground)]">
                       Your dashboard
                     </Link>
+                    <Link href="/account" onClick={() => setMenuOpen(false)} className="block rounded-[10px] px-3 py-2 text-sm text-[var(--color-muted)] hover:bg-white/[0.06] hover:text-[var(--color-foreground)]">
+                      Account settings
+                    </Link>
                     {session.user.role === "ADMIN" && (
                       <Link href="/admin" onClick={() => setMenuOpen(false)} className="block rounded-[10px] px-3 py-2 text-sm text-[var(--color-muted)] hover:bg-white/[0.06] hover:text-[var(--color-foreground)]">
                         Admin dashboard
@@ -113,6 +116,9 @@ export function Header() {
             <>
               <Link href="/welcome" className="rounded-lg px-3 py-2 text-sm text-[var(--color-muted)] hover:bg-white/[0.04]" onClick={() => setOpen(false)}>
                 Your dashboard
+              </Link>
+              <Link href="/account" className="rounded-lg px-3 py-2 text-sm text-[var(--color-muted)] hover:bg-white/[0.04]" onClick={() => setOpen(false)}>
+                Account settings
               </Link>
               {session.user.role === "ADMIN" && (
                 <Link href="/admin" className="rounded-lg px-3 py-2 text-sm text-[var(--color-muted)] hover:bg-white/[0.04]" onClick={() => setOpen(false)}>
