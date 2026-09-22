@@ -67,6 +67,17 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+// Used for password reset links (see /api/auth/forgot-password and
+// /api/auth/reset-password). `token` stores a SHA-256 hash of the actual
+// token, not the raw value — see lib/tokens.ts.
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
 model Category {
   id          String   @id @default(cuid())
   name        String   @unique

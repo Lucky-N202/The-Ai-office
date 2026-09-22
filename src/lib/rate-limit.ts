@@ -34,6 +34,12 @@ export const checkSubmissionRateLimit = createRateLimitChecker("ratelimit:submis
 // successful attempt — this mostly exists to blunt scripted list-bombing.
 export const checkNewsletterRateLimit = createRateLimitChecker("ratelimit:newsletter", Ratelimit.slidingWindow(3, "1 h"));
 
+// A real user rarely needs more than 1-2 reset emails in a row; this mainly
+// blunts using the endpoint to spam an inbox or to probe which emails have
+// accounts (the route itself also always returns the same generic response
+// regardless of what it finds, so this is a second layer, not the only one).
+export const checkPasswordResetRateLimit = createRateLimitChecker("ratelimit:password-reset", Ratelimit.slidingWindow(3, "1 h"));
+
 /** Best-effort caller IP extraction behind Vercel's proxy. */
 export function getClientIp(req: Request): string {
   const forwardedFor = req.headers.get("x-forwarded-for");

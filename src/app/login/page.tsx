@@ -72,6 +72,9 @@ export default async function LoginPage({
       <form action={loginWithPassword} className="flex w-full flex-col gap-3 text-left">
         <Input type="email" name="email" placeholder="Email" required />
         <Input type="password" name="password" placeholder="Password" required />
+        <Link href="/forgot-password" className="-mt-1 self-end text-xs text-[var(--color-muted)] hover:text-[var(--color-primary)] hover:underline">
+          Forgot password?
+        </Link>
         {error === "CredentialsSignin" && (
           <p className="text-sm text-red-500">Invalid email or password.</p>
         )}
