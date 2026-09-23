@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CookiePreferencesLink } from "@/components/cookie-preferences-link";
 
 export function Footer() {
   return (
@@ -32,6 +33,7 @@ export function Footer() {
           <ul className="space-y-2 text-sm text-[var(--color-muted)]">
             <li><Link href="/privacy" className="hover:text-[var(--color-foreground)]">Privacy</Link></li>
             <li><Link href="/terms" className="hover:text-[var(--color-foreground)]">Terms</Link></li>
+            <li><CookiePreferencesLink /></li>
           </ul>
         </div>
       </div>

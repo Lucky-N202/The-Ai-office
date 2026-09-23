@@ -9,6 +9,7 @@ import { Toaster } from "sonner";
 import { getSiteUrl } from "@/lib/site";
 import { AdSenseScript } from "@/components/adsense-script";
 import { SessionProvider } from "@/components/session-provider";
+import { CookieConsentBanner } from "@/components/cookie-consent-banner";
 import { Analytics } from '@vercel/analytics/next';
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
@@ -57,6 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Toaster theme="dark" position="bottom-right" />
           </ThemeProvider>
         </SessionProvider>
+        <CookieConsentBanner />
         <Analytics/>
       </body>
     </html>

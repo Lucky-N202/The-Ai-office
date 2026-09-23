@@ -23,10 +23,50 @@ export function AdSenseScript() {
   if (!clientId) return null;
 
   return (
-    <script
-      async
-      src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${clientId}`}
-      crossOrigin="anonymous"
-    />
+    <>
+      {/*
+       * Google Consent Mode: sets ad/analytics cookie consent to "denied"
+       * by DEFAULT, before the adsbygoogle script below ever loads — this
+       * is what actually stops Google from setting tracking cookies for a
+       * new visitor, not just whether the banner below is visible. If a
+       * choice was already stored from a previous visit, it's applied
+       * immediately too, so returning visitors who accepted aren't
+       * defaulted back to denied for a moment.
+       *
+       * Plain inline script (not next/script) so it runs synchronously,
+       * before the async adsbygoogle.js request fires.
+       */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+window.dataLayer = window.dataLayer || [];
+function gtag(){window.dataLayer.push(arguments);}
+window.gtag = gtag;
+gtag('consent', 'default', {
+  ad_storage: 'denied',
+  ad_user_data: 'denied',
+  ad_personalization: 'denied',
+  analytics_storage: 'denied'
+});
+try {
+  var stored = localStorage.getItem('cookie-consent');
+  if (stored === 'granted') {
+    gtag('consent', 'update', {
+      ad_storage: 'granted',
+      ad_user_data: 'granted',
+      ad_personalization: 'granted',
+      analytics_storage: 'granted'
+    });
+  }
+} catch (e) {}
+`,
+        }}
+      />
+      <script
+        async
+        src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${clientId}`}
+        crossOrigin="anonymous"
+      />
+    </>
   );
 }
