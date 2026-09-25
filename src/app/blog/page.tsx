@@ -4,6 +4,7 @@ import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { NewsletterForm } from "@/components/newsletter-form";
 import { Badge } from "@/components/ui/badge";
+import { Rss } from "lucide-react";
 
 export const revalidate = 3600;
 
@@ -30,11 +31,19 @@ export default async function BlogPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 lg:px-8">
-      <div className="mb-10">
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Blog</h1>
-        <p className="mt-3 text-[var(--color-muted)]">
-          What&rsquo;s new and what changed across the AI tools we track — published weekly.
-        </p>
+      <div className="mb-10 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Blog</h1>
+          <p className="mt-3 text-[var(--color-muted)]">
+            What&rsquo;s new and what changed across the AI tools we track — published weekly.
+          </p>
+        </div>
+        <a
+          href="/rss.xml"
+          className="mt-1 flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--color-border)] px-3 py-1.5 text-xs text-[var(--color-muted)] hover:text-[var(--color-primary)]"
+        >
+          <Rss size={13} /> RSS
+        </a>
       </div>
 
       <div className="card-surface mb-12 p-6">

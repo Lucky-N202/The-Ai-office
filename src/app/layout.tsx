@@ -34,7 +34,10 @@ export const metadata: Metadata = {
     title: "The AI Office — Discover the Best AI Tools",
     description: "Browse, compare, and bookmark the best AI tools for every workflow.",
   },
-  alternates: { canonical: siteUrl },
+  alternates: {
+    canonical: siteUrl,
+    types: { "application/rss+xml": `${siteUrl}/rss.xml` },
+  },
   robots: { index: true, follow: true },
   verification: {
     google: "Zoy5kKqQ-jj40RcDQsahBjHK3Z-i2h_ILVweO6Rxp38",
