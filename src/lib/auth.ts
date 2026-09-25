@@ -5,6 +5,7 @@ import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { track } from "@vercel/analytics/server";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   // The adapter still handles account linking/storage for GitHub and Google.
@@ -76,6 +77,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
   pages: { signIn: "/login" },
+  events: {
+    // Fires exactly once, only when the adapter creates a brand new User
+    // row — i.e. a genuine first-time GitHub/Google signup, never a
+    // returning user logging in again. Email/password signups bypass the
+    // adapter entirely (see api/auth/signup/route.ts) and are tracked
+    // there instead — the two together cover every signup path once each.
+    async createUser({ user }) {
+      try {
+        await track("account_created", { method: "oauth" });
+      } catch {
+        // Never let analytics block the actual signup.
+      }
+    },
+  },
 });
 
 /** Throws-free helper: returns the current session's user, or null. */

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { checkNewsletterRateLimit, getClientIp } from "@/lib/rate-limit";
 import { sendWelcomeEmail } from "@/lib/newsletter/send";
+import { track } from "@vercel/analytics/server";
 
 const subscribeSchema = z.object({ email: z.string().email() });
 
@@ -33,6 +34,12 @@ export async function POST(req: NextRequest) {
   });
 
   const welcome = await sendWelcomeEmail(subscriber.email, subscriber.unsubscribeToken);
+
+  try {
+    await track("newsletter_signup");
+  } catch {
+    // Never let analytics block the actual signup.
+  }
 
   return NextResponse.json({ success: true, welcomeEmailSent: welcome.sent }, { status: 201 });
 }

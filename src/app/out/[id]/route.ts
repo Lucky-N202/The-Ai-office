@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { track } from "@vercel/analytics/server";
 
 /**
  * Tracked outbound link. Every "Visit Website" click routes through here
@@ -13,7 +14,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
   const tool = await prisma.tool.findUnique({
     where: { id },
-    select: { websiteUrl: true, affiliateUrl: true },
+    select: { name: true, slug: true, websiteUrl: true, affiliateUrl: true },
   });
 
   if (!tool) {
@@ -27,6 +28,15 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     await prisma.tool.update({ where: { id }, data: { clickCount: { increment: 1 } } });
   } catch {
     // Don't let a tracking failure block the actual redirect.
+  }
+
+  // Same reasoning as above re: awaiting — plus this gives you a real
+  // time-series/breakdown view in Vercel Analytics (which tools, which day)
+  // instead of only the single running total clickCount gives you.
+  try {
+    await track("tool_click", { tool: tool.name, slug: tool.slug });
+  } catch {
+    // Never let analytics block the actual redirect.
   }
 
   return NextResponse.redirect(tool.affiliateUrl || tool.websiteUrl);

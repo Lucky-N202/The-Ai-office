@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { checkSubmissionRateLimit, getClientIp } from "@/lib/rate-limit";
+import { track } from "@vercel/analytics/server";
 
 const submissionSchema = z.object({
   name: z.string().min(1).max(80),
@@ -43,6 +44,13 @@ export async function POST(req: NextRequest) {
   }
 
   const submission = await prisma.toolSubmission.create({ data });
+
+  try {
+    await track("tool_submitted", { name: submission.name });
+  } catch {
+    // Never let analytics block the actual submission.
+  }
+
   return NextResponse.json(submission, { status: 201 });
 }
 

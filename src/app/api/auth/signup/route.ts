@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { track } from "@vercel/analytics/server";
 
 const signupSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -37,6 +38,12 @@ export async function POST(req: Request) {
     const user = await prisma.user.create({
       data: { name, email, password: hashedPassword },
     });
+
+    try {
+      await track("account_created", { method: "credentials" });
+    } catch {
+      // Never let analytics block the actual signup.
+    }
 
     return NextResponse.json({ id: user.id, email: user.email, name: user.name }, { status: 201 });
   } catch (err) {
