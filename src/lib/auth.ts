@@ -6,6 +6,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { track } from "@vercel/analytics/server";
+import * as Sentry from "@sentry/nextjs";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   // The adapter still handles account linking/storage for GitHub and Google.
@@ -72,6 +73,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         session.user.id = token.id as string;
         session.user.role = token.role as "USER" | "ADMIN";
+
+        // Tags any error Sentry captures during this request with who hit
+        // it — lets you search Sentry by user, or just see who was
+        // affected, instead of a support conversation starting from "it's
+        // broken" with no way to reproduce it.
+        Sentry.setUser({ id: session.user.id, email: session.user.email ?? undefined });
       }
       return session;
     },
