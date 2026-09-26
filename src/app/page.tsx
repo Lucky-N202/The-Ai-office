@@ -12,6 +12,7 @@ import { PaddleCheckoutHandler } from "@/components/paddle-checkout-handler";
 
 export const revalidate = 3600; // ISR: refresh hourly
 
+
 async function getHomeData() {
   const [featured, categories, toolCount] = await Promise.all([
     prisma.tool.findMany({

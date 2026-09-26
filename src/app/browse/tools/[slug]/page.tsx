@@ -9,6 +9,7 @@ import { StarRating } from "@/components/ui/star-rating";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BookmarkButton } from "@/components/bookmark-button";
+import { ReviewForm } from "@/components/review-form";
 import { ToolCard } from "@/components/tool-card";
 import { JsonLd } from "@/components/json-ld";
 import { formatPrice, pricingLabel, formatNumber } from "@/lib/utils";
@@ -202,9 +203,12 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
             </div>
           </section>
 
-          {tool.reviews.length > 0 && (
-            <section>
-              <h2 className="mb-3 text-lg font-semibold">Reviews</h2>
+          <section>
+            <h2 className="mb-3 text-lg font-semibold">Reviews</h2>
+            <div className="mb-4">
+              <ReviewForm toolId={tool.id} toolSlug={tool.slug} />
+            </div>
+            {tool.reviews.length > 0 ? (
               <div className="space-y-4">
                 {tool.reviews.map((review) => (
                   <div key={review.id} className="card-surface p-4">
@@ -217,8 +221,10 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
                   </div>
                 ))}
               </div>
-            </section>
-          )}
+            ) : (
+              <p className="text-sm text-[var(--color-muted)]">No reviews yet — be the first to share your experience.</p>
+            )}
+          </section>
         </div>
 
         <aside className="space-y-4">

@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { auth, requireAdmin } from "@/lib/auth";
 
@@ -22,10 +23,12 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   // here, which left stale aggregate numbers on the tool after any
   // deletion (admin-initiated or otherwise).
   const agg = await prisma.review.aggregate({ where: { toolId: review.toolId }, _avg: { rating: true }, _count: true });
-  await prisma.tool.update({
+  const tool = await prisma.tool.update({
     where: { id: review.toolId },
     data: { rating: agg._avg.rating ?? 0, reviewCount: agg._count },
   });
+
+  revalidatePath(`/browse/tools/${tool.slug}`);
 
   return NextResponse.json({ success: true });
 }

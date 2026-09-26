@@ -40,6 +40,13 @@ export const checkNewsletterRateLimit = createRateLimitChecker("ratelimit:newsle
 // regardless of what it finds, so this is a second layer, not the only one).
 export const checkPasswordResetRateLimit = createRateLimitChecker("ratelimit:password-reset", Ratelimit.slidingWindow(3, "1 h"));
 
+// Keyed by user ID, not IP — unlike the anonymous endpoints above, review
+// submission requires auth, so the actual actor is known and IP isn't
+// needed as a proxy for identity. A genuine user reviewing tools one at a
+// time in a sitting won't come close to 10/hour; a script looping over
+// every tool in the catalog will hit this fast.
+export const checkReviewRateLimit = createRateLimitChecker("ratelimit:reviews", Ratelimit.slidingWindow(10, "1 h"));
+
 /** Best-effort caller IP extraction behind Vercel's proxy. */
 export function getClientIp(req: Request): string {
   const forwardedFor = req.headers.get("x-forwarded-for");
