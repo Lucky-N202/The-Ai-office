@@ -28,11 +28,18 @@ export const metadata: Metadata = {
     title: "The AI Office — Discover the Best AI Tools",
     description: "Browse, compare, and bookmark the best AI tools for every workflow.",
     url: siteUrl,
+    // metadataBase above makes this resolve to an absolute URL automatically.
+    // Any page that sets its own openGraph.images (tool pages, blog posts)
+    // overrides this; everything else — homepage, category pages, static
+    // pages like /about — now gets a real image instead of a bare text card
+    // when shared.
+    images: [{ url: "/og-default.png", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
     title: "The AI Office — Discover the Best AI Tools",
     description: "Browse, compare, and bookmark the best AI tools for every workflow.",
+    images: ["/og-default.png"],
   },
   alternates: {
     canonical: siteUrl,

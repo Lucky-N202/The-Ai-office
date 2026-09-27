@@ -7,6 +7,7 @@ import { ProfileForm } from "@/components/account/profile-form";
 import { PasswordForm } from "@/components/account/password-form";
 import { DangerZone } from "@/components/account/danger-zone";
 import { ReviewRow } from "@/components/account/review-row";
+import { Button } from "@/components/ui/button";
 import { Bookmark, Star } from "lucide-react";
 
 export const metadata: Metadata = { title: "Account Settings" };
@@ -94,6 +95,18 @@ export default async function AccountPage() {
             ))}
           </div>
         )}
+      </section>
+
+      <section className="card-surface mb-6 p-6">
+        <h2 className="mb-1 text-lg font-semibold">Download your data</h2>
+        <p className="mb-4 text-sm text-[var(--color-muted)]">
+          Get a copy of your profile, reviews, and saved tools as a JSON file.
+        </p>
+        <a href="/api/account/export" download>
+          <Button variant="outline" size="sm">
+            Download my data
+          </Button>
+        </a>
       </section>
 
       <DangerZone />

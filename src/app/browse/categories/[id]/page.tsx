@@ -42,7 +42,14 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
-  const category = await prisma.category.findUnique({ where: { id } });
+
+  let category;
+  try {
+    category = await prisma.category.findUnique({ where: { id } });
+  } catch (err) {
+    console.error(`generateMetadata: failed to fetch category "${id}", using fallback metadata`, err);
+    return { title: "Category — The AI Office" };
+  }
   if (!category) return {};
   const siteUrl = getSiteUrl();
   return {

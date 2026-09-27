@@ -40,7 +40,21 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const tool = await getTool(slug);
+
+  let tool;
+  try {
+    tool = await getTool(slug);
+  } catch (err) {
+    // A transient DB hiccup here previously crashed the *entire* build,
+    // not just this one page's metadata — generateStaticParams already
+    // succeeded in listing this slug, so Next.js still tries to prerender
+    // it; if the DB drops between those two calls, this used to be fatal.
+    // Falling back to generic metadata lets the build continue; the actual
+    // page component below still renders real content once the DB
+    // recovers (on this build or the next request, per ISR).
+    console.error(`generateMetadata: failed to fetch tool "${slug}", using fallback metadata`, err);
+    return { title: "Tool — The AI Office" };
+  }
   if (!tool) return {};
   const siteUrl = getSiteUrl();
   return {

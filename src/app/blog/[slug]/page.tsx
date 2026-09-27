@@ -29,7 +29,14 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const article = await getArticle(slug);
+
+  let article;
+  try {
+    article = await getArticle(slug);
+  } catch (err) {
+    console.error(`generateMetadata: failed to fetch article "${slug}", using fallback metadata`, err);
+    return { title: "Blog — The AI Office" };
+  }
   if (!article) return {};
 
   const siteUrl = getSiteUrl();
