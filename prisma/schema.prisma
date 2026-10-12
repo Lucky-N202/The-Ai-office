@@ -138,6 +138,7 @@ model Tool {
   category      Category     @relation(fields: [categoryId], references: [id])
   bookmarks     Bookmark[]
   reviews       Review[]
+  submissions   ToolSubmission[] @relation("SubmissionApprovedTool")
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
@@ -271,8 +272,17 @@ model ToolSubmission {
   priorityReview Boolean          @default(false)
   createdAt      DateTime         @default(now())
   reviewedAt     DateTime?
+  // What turns this table from a work queue into an audit log (see
+  // /admin/submissions): who made the call, and — for approvals — which
+  // Tool it produced. Both nullable so rows from before this existed stay
+  // valid; SetNull so deleting a published tool later doesn't delete its
+  // submission record.
+  reviewedBy     String?
+  approvedToolId String?
+  approvedTool   Tool?            @relation("SubmissionApprovedTool", fields: [approvedToolId], references: [id], onDelete: SetNull)
 
   @@index([status])
+  @@index([submitterEmail])
 }
 
 model Bookmark {

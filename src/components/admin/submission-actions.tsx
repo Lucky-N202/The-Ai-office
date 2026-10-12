@@ -29,6 +29,7 @@ export function SubmissionActions({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(action === "approve" ? { action, categoryId } : { action }),
     });
+    const data = await res.json().catch(() => null);
     setLoading(null);
     if (res.ok) {
       if (action === "approve") toast.success("Tool published");
@@ -36,7 +37,12 @@ export function SubmissionActions({
       else toast.success(priorityReview ? "Priority removed" : "Marked as priority");
       router.refresh();
     } else {
-      toast.error("Something went wrong");
+      // Show the server's actual reason (e.g. "looks like a duplicate")
+      // rather than a generic failure the admin can't act on.
+      toast.error(typeof data?.error === "string" ? data.error : "Something went wrong");
+      // A 409 means this card is stale (already decided elsewhere) — refresh
+      // so it moves out of the pending list instead of staying clickable.
+      if (res.status === 409) router.refresh();
     }
   }
 

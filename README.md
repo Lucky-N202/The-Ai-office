@@ -28,7 +28,7 @@ This README is the entry point. Day-to-day operational tasks (promoting an admin
 - **Accounts**: sign up/log in via GitHub, Google, or email+password; `/account` for profile editing, password change, linked sign-in methods, saved tools, your own reviews, data export, and account deletion; `/forgot-password` → `/reset-password` for password recovery
 - **Reviews**: star rating + title + body per tool, one per user per tool (editable, not duplicated), rate-limited, with the tool's aggregate rating recalculated and the page's ISR cache busted immediately on post/edit/delete
 - **Bookmarks**: instant localStorage persistence, synced to Postgres on login, viewable at `/bookmarks`
-- **Tool submissions**: public form at `/submit` (honeypot + rate limit) with logo URL and category, feeding an admin review queue (`/admin/submissions`) that approves (publishes as a real `Tool`, using the submitter's own logo) or rejects
+- **Tool submissions**: public form at `/submit` (honeypot + rate limit) with logo URL and category, feeding `/admin/submissions` — a review queue *and* a permanent log. Tabs for All / Pending / Approved / Rejected, search by tool/email/URL, and per-entry submitter email (flagged if they're a registered user, with a count of how many times they've submitted), category, submitted/reviewed timestamps, which admin made the call, and a link to the published listing for approvals. Approving publishes a real `Tool` (using the submitter's own logo); approving or rejecting an already-decided submission, or approving a name that already exists, is refused with a clear message
 - **Admin** (`/admin`, role-gated): CRUD for Tools, Categories, Articles, and Reviews; the tool-change review queue (`/admin/changes`); submission approvals
 - **Blog**: AI-assisted and hand-written articles, cover images, RSS feed at `/rss.xml`, feed autodiscovery site-wide
 - **Cookie consent**: banner wired into Google Consent Mode (not just cosmetic — ad/analytics cookies default to denied until accepted), reopenable from the footer
@@ -100,7 +100,7 @@ Sentry (error monitoring) is documented but **not yet installed** in this codeba
 
 - `prisma/schema.prisma` — 13 models: `User`, `Account`, `Session`, `VerificationToken` (password reset), `Category`, `Tool`, `ToolSnapshot`, `ToolChange`, `Review`, `Article`, `NewsletterSubscriber`, `ToolSubmission`, `Bookmark`
 - `prisma/seed.ts` — categories + the original commercial-tool catalog
-- `prisma/add-open-source-tools.ts`, `prisma/upgrade-tool-logos.ts`, `prisma/fix-missing-logos.ts`, `prisma/enrich-tools.ts` — one-off, idempotent scripts layered on top of the seed; run with `npx tsx prisma/<file>.ts`. Each is safe to re-run.
+- `prisma/add-open-source-tools.ts`, `prisma/upgrade-tool-logos.ts`, `prisma/fix-missing-logos.ts`, `prisma/enrich-tools.ts`, `prisma/backfill-submission-links.ts` — one-off, idempotent scripts layered on top of the seed; run with `npx tsx prisma/<file>.ts`. Each is safe to re-run.
 - `prisma/seed-articles.ts`, `prisma/seed-articles-2.ts`, `prisma/set-blog-covers.ts`, `prisma/backfill-missing-covers.ts`, `prisma/set-digest-covers.ts` — same pattern, for blog content and cover images
 - `prisma.config.ts` — the non-deprecated way to configure the Prisma CLI; reads `.env` via `dotenv/config`, so populate `.env` before running any `prisma` command
 

@@ -41,6 +41,16 @@ npx tsx prisma/set-digest-covers.ts
 
 Make sure `DATABASE_URL` in your active shell points at the database you actually mean to change — these run against whatever `.env`/shell environment is currently loaded, local or production.
 
+## Review submissions and read the log
+
+`/admin/submissions` is both the review queue and the permanent log of everything ever submitted.
+
+- It opens on **Pending** when anything is waiting, otherwise on **All**. The sidebar badge shows the pending count.
+- Each entry records the submitter's email (and whether that email belongs to a registered user, plus how many submissions that address has made — a quick spam signal), the category they chose, when it was submitted, when and **by which admin** it was decided, and for approvals a link to the published listing.
+- Times are shown in UTC.
+- Approving a name that already exists as a tool is refused as a probable duplicate — reject it instead. Re-deciding an already-decided submission is refused too (protects against double-clicks and stale tabs).
+- Submissions approved *before* this log existed have no linked listing and no reviewer. Run `npx tsx prisma/backfill-submission-links.ts` once after `prisma db push` to recover the listing links (the reviewer can't be recovered — it wasn't recorded).
+
 ## Rate limits reference
 
 All via `src/lib/rate-limit.ts`, Upstash-backed, silently permissive if Upstash env vars are unset:

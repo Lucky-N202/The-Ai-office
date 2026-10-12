@@ -22,8 +22,26 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const parsed = decisionSchema.safeParse(await req.json());
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
+  // Every action below only makes sense while a submission is still waiting
+  // for a decision. Without this, a double-click or a stale browser tab
+  // could approve the same submission twice (creating the same Tool again
+  // and crashing on its unique slug) or flip an approved one to rejected —
+  // which would also corrupt the log at /admin/submissions.
+  if (submission.status !== "PENDING") {
+    return NextResponse.json(
+      { error: `This submission was already ${submission.status.toLowerCase()}. Refresh the page to see its current state.` },
+      { status: 409 }
+    );
+  }
+
+  // Recorded in the log so it's clear who made each call.
+  const reviewer = admin.email ?? admin.name ?? "unknown admin";
+
   if (parsed.data.action === "reject") {
-    await prisma.toolSubmission.update({ where: { id }, data: { status: "REJECTED", reviewedAt: new Date() } });
+    await prisma.toolSubmission.update({
+      where: { id },
+      data: { status: "REJECTED", reviewedAt: new Date(), reviewedBy: reviewer },
+    });
     return NextResponse.json({ success: true });
   }
 
@@ -35,10 +53,19 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json(updated);
   }
 
+  const slug = slugify(submission.name);
+  const existing = await prisma.tool.findUnique({ where: { slug }, select: { name: true } });
+  if (existing) {
+    return NextResponse.json(
+      { error: `A tool called "${existing.name}" is already in the directory, so this looks like a duplicate. Reject it instead.` },
+      { status: 409 }
+    );
+  }
+
   const tool = await prisma.tool.create({
     data: {
       name: submission.name,
-      slug: slugify(submission.name),
+      slug,
       tagline: submission.tagline,
       description: submission.description,
       websiteUrl: submission.websiteUrl,
@@ -51,7 +78,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     },
   });
 
-  await prisma.toolSubmission.update({ where: { id }, data: { status: "APPROVED", reviewedAt: new Date() } });
+  await prisma.toolSubmission.update({
+    where: { id },
+    data: { status: "APPROVED", reviewedAt: new Date(), reviewedBy: reviewer, approvedToolId: tool.id },
+  });
 
   return NextResponse.json(tool, { status: 201 });
 }
