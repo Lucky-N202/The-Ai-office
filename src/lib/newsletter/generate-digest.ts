@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { prisma } from "@/lib/prisma";
 import { slugify } from "@/lib/utils";
+import { parseModelJson } from "@/lib/newsletter/util";
 
 const client = process.env.ANTHROPIC_API_KEY ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY }) : null;
 
@@ -20,6 +21,9 @@ export type DigestResult = {
   slug: string;
   excerpt: string;
   content: string;
+  /** Real changes + new tools backing this post — used to decide if it's substantial enough to auto-publish. */
+  itemCount: number;
+  toolNames: string[];
 } | null;
 
 /**
@@ -61,7 +65,7 @@ export async function generateWeeklyDigest(): Promise<DigestResult> {
 
   try {
     const response = await client.messages.create({
-      model: process.env.ANTHROPIC_MODEL || "claude-sonnet-5",
+      model: process.env.ANTHROPIC_MODEL || "claude-sonnet-5-5",
       max_tokens: 1500,
       system: SYSTEM_PROMPT,
       messages: [
@@ -75,7 +79,7 @@ export async function generateWeeklyDigest(): Promise<DigestResult> {
     const textBlock = response.content.find((b) => b.type === "text");
     if (!textBlock || textBlock.type !== "text") return null;
 
-    const parsed = JSON.parse(textBlock.text.trim()) as { title: string; excerpt: string; content: string };
+    const parsed = parseModelJson<{ title: string; excerpt: string; content: string }>(textBlock.text);
 
     // Ensure slug uniqueness by appending a short date suffix — weekly
     // digests will often generate similar titles week to week.
@@ -87,6 +91,8 @@ export async function generateWeeklyDigest(): Promise<DigestResult> {
       slug: `${baseSlug}-${dateSuffix}`,
       excerpt: parsed.excerpt,
       content: parsed.content,
+      itemCount: changes.length + newTools.length,
+      toolNames: [...new Set([...changes.map((c) => c.tool.name), ...newTools.map((t) => t.name)])],
     };
   } catch {
     return null;

@@ -84,7 +84,7 @@ Slug: ${t.slug}
 
   try {
     const response = await client.messages.create({
-      model: process.env.ANTHROPIC_MODEL || "claude-sonnet-5",
+      model: process.env.ANTHROPIC_MODEL || "claude-sonnet-5-5",
       max_tokens: 2000,
       system: SYSTEM_PROMPT,
       messages: [
