@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import { Check, Star, ShieldCheck, TrendingUp } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { CopyEmailButton } from "@/components/copy-email-button";
 
 export const metadata: Metadata = {
+  alternates: pageAlternates("/advertise"),
   title: "Advertise Your AI Tool",
   description: "Get your AI tool featured in front of a curated, high-intent audience actively comparing tools.",
   openGraph: {
@@ -52,12 +54,16 @@ const plans = [
 ];
 
 async function getStats() {
-  const [toolCount, categoryCount] = await Promise.all([prisma.tool.count(), prisma.category.count()]);
-  return { toolCount, categoryCount };
+  const [toolCount, categoryCount, clicks] = await Promise.all([
+    prisma.tool.count(),
+    prisma.category.count(),
+    prisma.tool.aggregate({ _sum: { clickCount: true } }),
+  ]);
+  return { toolCount, categoryCount, totalClicks: clicks._sum.clickCount ?? 0 };
 }
 
 export default async function AdvertisePage() {
-  const { toolCount, categoryCount } = await getStats();
+  const { toolCount, categoryCount, totalClicks } = await getStats();
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
@@ -67,6 +73,13 @@ export default async function AdvertisePage() {
           The AI Office is a curated directory of {toolCount}+ tools across {categoryCount} categories, built
           for people actively comparing and choosing AI tools — not casual browsers.
         </p>
+        {/* Real number from /out/[id] click tracking, shown only once it's
+            impressive enough to help the pitch rather than hurt it. */}
+        {totalClicks >= 250 && (
+          <p className="mt-3 text-sm font-medium text-[var(--color-primary)]">
+            {totalClicks.toLocaleString("en-US")}+ visitor clicks sent through to listed tools so far.
+          </p>
+        )}
       </div>
 
       <div className="mb-16 grid grid-cols-1 gap-4 sm:grid-cols-3">

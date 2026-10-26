@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
@@ -7,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Github, Chrome } from "lucide-react";
 import bcrypt from "bcryptjs";
+
+export const metadata: Metadata = { title: "Sign Up", robots: { index: false, follow: false } };
 
 export default async function SignupPage({
   searchParams,

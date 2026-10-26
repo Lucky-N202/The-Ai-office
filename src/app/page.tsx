@@ -1,8 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { getSiteUrl } from "@/lib/site";
+import { pageAlternates } from "@/lib/seo";
 import { ToolCard } from "@/components/tool-card";
 import { CategoryGrid } from "@/components/category-grid";
 import { JsonLd } from "@/components/json-ld";
@@ -11,6 +13,8 @@ import { HeroSearchButton } from "@/components/hero-search-button";
 import { PaddleCheckoutHandler } from "@/components/paddle-checkout-handler";
 
 export const revalidate = 3600; // ISR: refresh hourly
+
+export const metadata: Metadata = { alternates: pageAlternates("/") };
 
 
 async function getHomeData() {

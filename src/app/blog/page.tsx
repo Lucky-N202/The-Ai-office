@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
@@ -9,6 +10,7 @@ import { Rss } from "lucide-react";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
+  alternates: pageAlternates("/blog"),
   title: "Blog",
   description: "Weekly roundups of what's new and changed across the AI tools landscape.",
   openGraph: {

@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import { prisma } from "@/lib/prisma";
 import { AdSlot } from "@/components/ad-slot";
 
 export const metadata: Metadata = {
+  alternates: pageAlternates("/about"),
   title: "About",
   description: "The AI Office is a curated directory for discovering, comparing, and bookmarking the best AI tools.",
   openGraph: {

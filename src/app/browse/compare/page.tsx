@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import { prisma } from "@/lib/prisma";
 import { CompareClient } from "@/components/compare-client";
 
 export const revalidate = 1800;
 
 export const metadata: Metadata = {
+  alternates: pageAlternates("/browse/compare"),
   title: "Compare AI Tools Side by Side",
   description: "Compare features, pricing, and ratings across AI tools to find the best fit for your workflow.",
   openGraph: {

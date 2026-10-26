@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     images: ["/og-default.png"],
   },
   alternates: {
-    canonical: siteUrl,
+    // No canonical here on purpose — see lib/seo.ts. Each page sets its own.
     types: { "application/rss+xml": `${siteUrl}/rss.xml` },
   },
   robots: { index: true, follow: true },

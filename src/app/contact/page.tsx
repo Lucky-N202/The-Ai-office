@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import { Mail } from "lucide-react";
 import { AdSlot } from "@/components/ad-slot";
 
 export const metadata: Metadata = {
+  alternates: pageAlternates("/contact"),
   title: "Contact",
   description: "Get in touch with The AI Office team.",
   openGraph: {

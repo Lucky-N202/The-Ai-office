@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import { prisma } from "@/lib/prisma";
 import { ToolBrowser } from "@/components/tool-browser";
 
 export const revalidate = 1800;
 
 export const metadata: Metadata = {
+  alternates: pageAlternates("/browse/tools/all"),
   title: "Browse All AI Tools",
   description: "Filter and search every AI tool in our directory by category, pricing, and rating.",
   openGraph: {

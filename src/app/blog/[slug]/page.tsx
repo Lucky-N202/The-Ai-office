@@ -13,6 +13,22 @@ import { NewsletterForm } from "@/components/newsletter-form";
 
 export const revalidate = 3600;
 
+/**
+ * Splits markdown just before its second H2 so an ad can sit mid-article,
+ * where readers actually are, instead of only after the last paragraph.
+ * Returns null for short posts, or if the split would land inside a code fence.
+ */
+function splitForAd(content: string): [string, string] | null {
+  if (content.length < 2500) return null;
+  const h2 = [...content.matchAll(/\n## /g)];
+  if (h2.length < 2) return null;
+  const at = h2[1]?.index;
+  if (at === undefined) return null;
+  const fences = (content.slice(0, at).match(/^```/gm) ?? []).length;
+  if (fences % 2 !== 0) return null;
+  return [content.slice(0, at), content.slice(at)];
+}
+
 async function getArticle(slug: string) {
   return prisma.article.findUnique({ where: { slug, status: "PUBLISHED" } });
 }
@@ -104,7 +120,17 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
       <h1 className="mb-6 text-3xl font-bold tracking-tight sm:text-4xl">{article.title}</h1>
 
-      <MarkdownContent content={article.content} />
+      {(() => {
+        const parts = splitForAd(article.content);
+        if (!parts) return <MarkdownContent content={article.content} />;
+        return (
+          <>
+            <MarkdownContent content={parts[0]} />
+            <AdSlot slot="5454803935" />
+            <MarkdownContent content={parts[1]} />
+          </>
+        );
+      })()}
 
       <AdSlot slot="5454803935" />
 

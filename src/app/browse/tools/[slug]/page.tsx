@@ -13,6 +13,7 @@ import { ReviewForm } from "@/components/review-form";
 import { ToolCard } from "@/components/tool-card";
 import { JsonLd } from "@/components/json-ld";
 import { formatPrice, pricingLabel, formatNumber } from "@/lib/utils";
+import { pairSlug } from "@/lib/compare";
 
 export const revalidate = 3600;
 
@@ -58,12 +59,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!tool) return {};
   const siteUrl = getSiteUrl();
   return {
-    title: `${tool.name} — ${tool.tagline}`,
-    description: tool.tagline,
+    // Match what people actually search ("<tool> pricing", "<tool> alternatives")
+    // instead of repeating the tagline; the layout's title template appends the
+    // site name.
+    title: `${tool.name} Review: Pricing, Features & Alternatives`,
+    description: `${tool.name}: ${tool.tagline.replace(/\.$/, "")}. See features, pricing, pros and cons, and the best alternatives.`.slice(0, 160),
     keywords: [tool.name, tool.category.name, ...tool.tags, ...tool.useCases],
     alternates: { canonical: `${siteUrl}/browse/tools/${tool.slug}` },
     openGraph: {
-      title: `${tool.name} — ${tool.tagline}`,
+      title: `${tool.name} Review: Pricing, Features & Alternatives`,
       description: tool.tagline,
       url: `${siteUrl}/browse/tools/${tool.slug}`,
       images: [{ url: tool.logoUrl }],
@@ -106,11 +110,13 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
           dateModified: tool.updatedAt.toISOString(),
           keywords: [...tool.tags, ...tool.useCases].join(", "),
           featureList: tool.features,
-          offers: {
-            "@type": "Offer",
-            price: tool.startingPrice ?? 0,
-            priceCurrency: "USD",
-          },
+          // Only emit an Offer when the price is actually known (or the tool is
+          // free/open source) — previously unknown-price paid tools were
+          // published to Google as "$0".
+          offers:
+            tool.startingPrice != null || tool.pricingModel === "FREE" || tool.pricingModel === "OPEN_SOURCE"
+              ? { "@type": "Offer", price: tool.startingPrice ?? 0, priceCurrency: "USD" }
+              : undefined,
           aggregateRating: tool.reviewCount > 0 ? {
             "@type": "AggregateRating",
             ratingValue: tool.rating,
@@ -255,6 +261,18 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
               {tool.category.name}
             </Link>
           </div>
+          <details className="card-surface p-5">
+            <summary className="cursor-pointer text-sm font-semibold text-[var(--color-muted)]">
+              Own {tool.name}? Add our badge
+            </summary>
+            <p className="mt-3 text-xs text-[var(--color-muted-2)]">
+              Show visitors you&rsquo;re listed here. Paste this on your site:
+            </p>
+            <pre className="mt-2 select-all overflow-x-auto whitespace-pre-wrap break-all rounded-lg bg-black/30 p-3 text-[11px] text-[var(--color-muted)]">{`<a href="${siteUrl}/browse/tools/${tool.slug}" target="_blank" rel="noopener"><img src="${siteUrl}/badge/${tool.slug}" alt="${tool.name} on The AI Office" width="220" height="56" /></a>`}</pre>
+            <Link href="/advertise" className="mt-3 inline-block text-xs text-[var(--color-primary)]">
+              Want Verified or Featured placement? →
+            </Link>
+          </details>
           <div className="card-surface p-5">
             <h3 className="mb-3 text-sm font-semibold text-[var(--color-muted)]">Tags</h3>
             <div className="flex flex-wrap gap-1.5">
@@ -266,7 +284,19 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
 
       {alternatives.length > 0 && (
         <section className="mt-16">
-          <h2 className="mb-6 text-xl font-semibold">Popular alternatives to {tool.name}</h2>
+          <h2 className="mb-3 text-xl font-semibold">Popular alternatives to {tool.name}</h2>
+          <p className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[var(--color-muted)]">
+            Compare head-to-head:
+            {alternatives.map((t) => (
+              <Link
+                key={t.id}
+                href={`/browse/compare/${pairSlug(tool.slug, t.slug)}`}
+                className="text-[var(--color-primary)] hover:underline"
+              >
+                {tool.name} vs {t.name}
+              </Link>
+            ))}
+          </p>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {alternatives.map((t, i) => <ToolCard key={t.id} tool={t} index={i} />)}
           </div>

@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import { SubmitForm } from "@/components/submit-form";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
+  alternates: pageAlternates("/submit"),
   title: "Submit a Tool",
   description: "Know an AI tool that should be in the directory? Submit it for review.",
   openGraph: {

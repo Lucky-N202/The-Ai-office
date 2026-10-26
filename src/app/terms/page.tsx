@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { pageAlternates } from "@/lib/seo";
 import { AdSlot } from "@/components/ad-slot";
 
 export const metadata: Metadata = {
+  alternates: pageAlternates("/terms"),
   title: "Terms of Service",
   description: "Terms of service for using The AI Office.",
   openGraph: {

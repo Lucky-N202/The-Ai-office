@@ -1,14 +1,16 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 import { getSiteUrl } from "@/lib/site";
+import { getComparePairs } from "@/lib/compare";
 
 const siteUrl = getSiteUrl();
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [tools, categories, articles] = await Promise.all([
+  const [tools, categories, articles, pairs] = await Promise.all([
     prisma.tool.findMany({ select: { slug: true, updatedAt: true } }),
     prisma.category.findMany({ select: { id: true, updatedAt: true } }),
     prisma.article.findMany({ where: { status: "PUBLISHED" }, select: { slug: true, updatedAt: true } }),
+    getComparePairs(),
   ]);
 
   const staticRoutes: MetadataRoute.Sitemap = [
@@ -44,5 +46,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  return [...staticRoutes, ...toolRoutes, ...categoryRoutes, ...articleRoutes];
+  const compareRoutes: MetadataRoute.Sitemap = pairs.map((p) => ({
+    url: `${siteUrl}/browse/compare/${p.slug}`,
+    lastModified: p.updatedAt,
+    changeFrequency: "weekly",
+    priority: 0.7,
+  }));
+
+  return [...staticRoutes, ...toolRoutes, ...categoryRoutes, ...compareRoutes, ...articleRoutes];
 }
