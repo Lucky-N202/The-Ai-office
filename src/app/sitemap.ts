@@ -16,6 +16,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: siteUrl, changeFrequency: "daily", priority: 1 },
     { url: `${siteUrl}/browse/compare`, changeFrequency: "weekly", priority: 0.6 },
+    { url: `${siteUrl}/browse/tools/all`, changeFrequency: "daily", priority: 0.9 },
     { url: `${siteUrl}/pricing-changes`, changeFrequency: "daily", priority: 0.6 },
     { url: `${siteUrl}/advertise`, changeFrequency: "monthly", priority: 0.4 },
     { url: `${siteUrl}/blog`, changeFrequency: "weekly", priority: 0.6 },
@@ -24,6 +25,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/submit`, changeFrequency: "monthly", priority: 0.4 },
     { url: `${siteUrl}/privacy`, changeFrequency: "yearly", priority: 0.1 },
     { url: `${siteUrl}/terms`, changeFrequency: "yearly", priority: 0.1 },
+    
   ];
 
   const toolRoutes: MetadataRoute.Sitemap = tools.map((t) => ({
