@@ -18,6 +18,7 @@ export function Footer() {
             <li><Link href="/browse/tools/all" className="hover:text-[var(--color-foreground)]">All Tools</Link></li>
             <li><Link href="/browse/compare" className="hover:text-[var(--color-foreground)]">Compare</Link></li>
             <li><Link href="/blog" className="hover:text-[var(--color-foreground)]">Blog</Link></li>
+            <li><Link href="/pricing-changes" className="hover:text-[var(--color-foreground)]">Pricing Changes</Link></li>
           </ul>
         </div>
         <div>

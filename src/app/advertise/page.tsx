@@ -4,6 +4,7 @@ import { Check, Star, ShieldCheck, TrendingUp } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { CopyEmailButton } from "@/components/copy-email-button";
+import { ClaimForm } from "@/components/claim-form";
 
 export const metadata: Metadata = {
   alternates: pageAlternates("/advertise"),
@@ -59,11 +60,12 @@ async function getStats() {
     prisma.category.count(),
     prisma.tool.aggregate({ _sum: { clickCount: true } }),
   ]);
-  return { toolCount, categoryCount, totalClicks: clicks._sum.clickCount ?? 0 };
+  const tools = await prisma.tool.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } });
+  return { toolCount, categoryCount, totalClicks: clicks._sum.clickCount ?? 0, tools };
 }
 
 export default async function AdvertisePage() {
-  const { toolCount, categoryCount, totalClicks } = await getStats();
+  const { toolCount, categoryCount, totalClicks, tools } = await getStats();
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
@@ -121,19 +123,7 @@ export default async function AdvertisePage() {
                 </li>
               ))}
             </ul>
-            {/* This mailto is the intended first step, not a placeholder to
-                replace — a vendor reaches out here, you confirm it's really
-                their tool, then generate a tool-specific Paddle payment link
-                for them from /admin/tools. See the Paddle integration
-                section in README.md for the full flow. */}
-            <a
-              href={`mailto:hello@the-ai-office.com?subject=${encodeURIComponent(
-                `${plan.name} placement — `
-              )}&body=${encodeURIComponent(
-                `Hi,\n\nI'd like to sign up for the ${plan.name} plan.\n\nTool name: \nWebsite URL: \n\nAnything else we should know:\n`
-              )}`}
-              className="mt-6"
-            >
+            <a href="#claim" className="mt-6">
               <Button className="w-full" variant={plan.highlight ? "primary" : "outline"}>
                 Get {plan.name}
               </Button>
@@ -142,8 +132,16 @@ export default async function AdvertisePage() {
         ))}
       </div>
 
-      <p className="mt-6 text-center text-sm text-[var(--color-muted-2)]">
-        Email link not opening? Copy it instead: <CopyEmailButton email="hello@the-ai-office.com" />
+      <section id="claim" className="mx-auto mt-16 max-w-xl scroll-mt-24">
+        <h2 className="mb-1 text-center text-2xl font-bold tracking-tight">Claim your listing</h2>
+        <p className="mb-6 text-center text-sm text-[var(--color-muted)]">
+          Tell us which tool is yours. We confirm ownership, then send you a secure checkout link.
+        </p>
+        <ClaimForm tools={tools} />
+      </section>
+
+      <p className="mt-10 text-center text-sm text-[var(--color-muted-2)]">
+        Prefer email? Email link not opening? Copy it instead: <CopyEmailButton email="hello@the-ai-office.com" />
       </p>
 
       <p className="mt-6 text-center text-sm text-[var(--color-muted)]">

@@ -93,6 +93,13 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
     take: 4,
   });
 
+  const recentChanges = await prisma.toolChange.findMany({
+    where: { toolId: tool.id, status: { in: ["AUTO_APPLIED", "APPROVED"] } },
+    orderBy: { createdAt: "desc" },
+    take: 3,
+    select: { id: true, summary: true, changeType: true, createdAt: true },
+  });
+
   const siteUrl = getSiteUrl();
 
   return (
@@ -222,6 +229,25 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
               </ul>
             </div>
           </section>
+
+          {recentChanges.length > 0 && (
+            <section>
+              <h2 className="mb-3 text-lg font-semibold">Recent changes</h2>
+              <ul className="space-y-2">
+                {recentChanges.map((c) => (
+                  <li key={c.id} className="text-sm text-[var(--color-muted)]">
+                    <span className="text-xs text-[var(--color-muted-2)]">
+                      {c.createdAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} ·{" "}
+                    </span>
+                    {c.summary}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/pricing-changes" className="mt-2 inline-block text-xs text-[var(--color-primary)]">
+                See all AI tool changes →
+              </Link>
+            </section>
+          )}
 
           <section>
             <h2 className="mb-3 text-lg font-semibold">Reviews</h2>
